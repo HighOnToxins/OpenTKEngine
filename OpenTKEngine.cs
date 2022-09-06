@@ -106,4 +106,8 @@ public class OpenTKEngine {
 		if(_window.IsFullscreen) _window.WindowState = WindowState.Normal;
 		else _window.WindowState = WindowState.Fullscreen;
 	}
+
+	public Matrix4 GetPixelToScreenMatrix() {
+		return Matrix4.CreateOrthographicOffCenter(0, _window.ClientSize.X, 0, _window.ClientSize.Y, -1, 1);
+	}
 }
