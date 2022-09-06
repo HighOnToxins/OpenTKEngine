@@ -8,12 +8,13 @@ using OpenTKMiniEngine.Rendering.Vertices;
 
 namespace OpenTKMiniEngine.Rendering;
 
-public class MeshRenderer<V, I> : Renderer where V : unmanaged, IVertex where I : IInstance {
+public class InstanceRenderer<V, I> : BufferRenderer where V : unmanaged, IVertex where I : IInstance {
 
 	public record RenderingInfo(
 		string VertPath, string FragPath,
 		MatrixVariableNames MatrixVariableNames,
-		params string[] VertexVariableNames);
+		params string[] VertexVariableNames
+	);
 
 	public record MatrixVariableNames(string MatrixVector0, string MatrixVector1, string MatrixVector2, string MatrixVector3);
 
@@ -23,8 +24,9 @@ public class MeshRenderer<V, I> : Renderer where V : unmanaged, IVertex where I 
 	private readonly string[] _vertexVariableNames;
 	private readonly MatrixVariableNames _matrixVariableNames;
 
-	public MeshRenderer(Mesh<V> mesh, List<I> instances, RenderingInfo renderingInfo) : 
+	public InstanceRenderer(Mesh<V> mesh, List<I> instances, RenderingInfo renderingInfo) : 
 			base(new ShaderProgram.ShaderInfo(renderingInfo.VertPath, renderingInfo.FragPath)) {
+
 		_mesh = mesh;
 		_instances = instances;
 
@@ -49,24 +51,21 @@ public class MeshRenderer<V, I> : Renderer where V : unmanaged, IVertex where I 
 			_matrixVariableNames.MatrixVector2,
 			_matrixVariableNames.MatrixVector3);
 
-	protected override List<VertexBuffer> LoadBuffers() => new(){
+	protected override List<VertexBuffer> InitBuffers() => new(){
 		new ArrayBuffer<V>("meshBuffer", _mesh.Vertices, Shader, _vertexVariableNames),
 		 CreateNewMatrixBuffer()
 	};
 
 
 	public override void RenderUpdate(FrameEventArgs obj, GameWindow win) {
-
 		int matrixBufferIndex = VertexBuffers.FindElementIndex(e => e.Name == "instanceMatrixBuffer");
 		VertexBuffers[matrixBufferIndex].Dispose();
 		VertexBuffers[matrixBufferIndex] = CreateNewMatrixBuffer();
 		VertexArray.SetVertexBuffer(VertexBuffers[matrixBufferIndex]);
-
 	}
 
 	public override void Draw() {
-		Renderer.DrawTrianglesInstanced(_mesh.Vertices.Length, _instances.Count);
+		BufferRenderer.DrawTrianglesInstanced(_mesh.Vertices.Length, _instances.Count);
 	}
-
 
 }

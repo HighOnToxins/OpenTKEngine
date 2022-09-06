@@ -7,22 +7,22 @@ using OpenTKMiniEngine.Scenes.Components;
 
 namespace OpenTKMiniEngine.Rendering;
 
-public abstract class Renderer : IRenderingComponent {
+public abstract class BufferRenderer : IRenderingComponent {
 
-	protected List<VertexBuffer> VertexBuffers { get; }
-	protected ShaderProgram Shader { get; }
-	protected VertexArray VertexArray { get; }
+	protected readonly List<VertexBuffer> VertexBuffers;
+	protected readonly ShaderProgram Shader;
+	protected readonly VertexArray VertexArray;
 
-	public Renderer(ShaderProgram.ShaderInfo shaderInfo) {
+	public BufferRenderer(ShaderProgram.ShaderInfo shaderInfo) {
 		Shader = new ShaderProgram(shaderInfo);
 
-		VertexBuffers = LoadBuffers();
+		VertexBuffers = InitBuffers();
 
 		VertexArray = new VertexArray();
 		VertexArray.SetVertexBufferList(VertexBuffers);
 	}
 
-	protected abstract List<VertexBuffer> LoadBuffers();
+	protected abstract List<VertexBuffer> InitBuffers();
 
 	public abstract void RenderUpdate(FrameEventArgs obj, GameWindow win);
 

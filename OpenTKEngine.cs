@@ -8,12 +8,12 @@ namespace OpenTKMiniEngine;
 
 public class OpenTKEngine {
 
-	public struct EngineOptions {
-		public int Width;
-		public int Height;
-		public string Title;
+	public readonly struct EngineOptions {
+		public readonly int Width;
+		public readonly int Height;
+		public readonly string Title;
 
-		public float Ratio;
+		public readonly float Ratio;
 
 		public EngineOptions() {
 			Width = 1200;
@@ -37,11 +37,10 @@ public class OpenTKEngine {
 			new NativeWindowSettings {
 				Title = options.Title,
 				Size = new Vector2i(options.Width, options.Height),
-			});
+			}
+		);
 
 		_window.Load += Load;
-		_window.RenderFrame += RenderFrame;
-		_window.Resize += Resize;
 
 		Ratio = options.Ratio;
 		_initScene = initScene;
@@ -54,6 +53,8 @@ public class OpenTKEngine {
 	private void Load() {
 		_scene = _initScene();
 
+		_window.Resize += Resize;
+		_window.RenderFrame += RenderFrame;
 		_window.Unload += _scene.Unload;
 
 		_window.KeyUp += _scene.KeyUp;
@@ -65,6 +66,7 @@ public class OpenTKEngine {
 		_window.MouseWheel += _scene.MouseWheel;
 		_window.MouseEnter += _scene.MouseEnter;
 		_window.MouseLeave += _scene.MouseLeave;
+
 	}
 
 	private void Resize(ResizeEventArgs obj) {
