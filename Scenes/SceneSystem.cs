@@ -1,9 +1,9 @@
 ﻿
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
-using OpenTKMiniEngine.Scenes.Components;
+using OpenTKEngine.Scenes.Components;
 
-namespace OpenTKMiniEngine.Scenes;
+namespace OpenTKEngine.Scenes;
 
 public class SceneSystem : IScene {
 

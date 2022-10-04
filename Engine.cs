@@ -2,18 +2,25 @@
 using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
-using OpenTKMiniEngine.Scenes;
+using OpenTKEngine.Scenes;
 
-namespace OpenTKMiniEngine;
+namespace OpenTKEngine;
 
-public class OpenTKEngine {
+public class Engine {
+
+	/*
+	TODO: Static shader info for variable and path names.
+	TODO: ColorRenderer, that uses Vecter3 (position), Matrices and a Vector4 (color)
+	TODO: TextureRenderer, that uses TextureVertex, Matrices and a TextureNum (int)
+	TODO: EntityRenderer, that takes a list of IReadonlyEntity
+	*/
 
 	public readonly struct EngineOptions {
-		public readonly int Width;
-		public readonly int Height;
-		public readonly string Title;
+		public int Width { internal get; init; }
+		public int Height { internal get; init; }
+		public string Title { internal get; init; }
 
-		public readonly float Ratio;
+		public float Ratio { internal get; init; }
 
 		public EngineOptions() {
 			Width = 1200;
@@ -29,9 +36,9 @@ public class OpenTKEngine {
 	private readonly Func<IScene> _initScene;
 	private IScene? _scene;
 
-	public float Ratio; //Width / Height
+	public float Ratio; //width divided by height
 
-	public OpenTKEngine(Func<IScene> initScene, EngineOptions options) { 
+	public Engine(Func<IScene> initScene, EngineOptions options) { 
 
 		_window = new GameWindow(GameWindowSettings.Default,
 			new NativeWindowSettings {
@@ -51,10 +58,14 @@ public class OpenTKEngine {
 	}
 
 	private void Load() {
+
+		GL.Enable(EnableCap.DepthTest);
+
 		_scene = _initScene();
 
 		_window.Resize += Resize;
 		_window.RenderFrame += RenderFrame;
+
 		_window.Unload += _scene.Unload;
 
 		_window.KeyUp += _scene.KeyUp;
@@ -66,7 +77,6 @@ public class OpenTKEngine {
 		_window.MouseWheel += _scene.MouseWheel;
 		_window.MouseEnter += _scene.MouseEnter;
 		_window.MouseLeave += _scene.MouseLeave;
-
 	}
 
 	private void Resize(ResizeEventArgs obj) {
@@ -97,7 +107,7 @@ public class OpenTKEngine {
 		_scene.Update(obj, _window);
 		_scene.RenderUpdate(obj, _window);
 
-		GL.Clear(ClearBufferMask.ColorBufferBit);
+		GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 		_scene.Render();
 		_window.SwapBuffers();
 	}

@@ -1,16 +1,13 @@
 ﻿
 using OpenTK.Mathematics;
 
-namespace OpenTKMiniEngine.Rendering.Vertices;
+namespace OpenTKEngine.Rendering.Vertices;
 
-public readonly struct MatrixVertex : IVertex {
+public readonly struct MatrixVertex {
 
-	public readonly Matrix4 Matrix;
+	public Matrix4 Matrix { get; private init; }
 
 	public MatrixVertex(Matrix4 matrix) {
 		Matrix = matrix;
 	}
-
-	public VertexAttribs GetAttribs() =>
-		new(typeof(float), 4, 4, 4, 4);
 }

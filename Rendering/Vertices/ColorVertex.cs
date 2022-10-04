@@ -1,18 +1,16 @@
 ﻿
 using OpenTK.Mathematics;
 
-namespace OpenTKMiniEngine.Rendering.Vertices;
+namespace OpenTKEngine.Rendering.Vertices;
 
-public readonly struct ColorVertex : IVertex {
-	public readonly Vector4 Position;
-	public readonly Vector4 Color;
+public readonly struct ColorVertex {
 
-	public ColorVertex(Vector4 position, Vector4 color){
+	public Vector3 Position { get; private init; }
+	public Vector4 Color { get; private init; }
+
+	public ColorVertex(Vector3 position, Vector4 color){
 		Position = position;
 		Color = color;
 	}
-
-	public VertexAttribs GetAttribs() =>
-		new(typeof(float), 4, 4);
 
 }

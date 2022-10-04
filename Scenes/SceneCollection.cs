@@ -2,7 +2,7 @@
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
 
-namespace OpenTKMiniEngine.Scenes;
+namespace OpenTKEngine.Scenes;
 
 public class SceneCollection : IScene {
 

@@ -1,7 +1,7 @@
 ﻿using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
 
-namespace OpenTKMiniEngine.Scenes.Components;
+namespace OpenTKEngine.Scenes.Components;
 
 public interface IRenderingComponent {
 

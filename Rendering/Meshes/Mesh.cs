@@ -1,11 +1,9 @@
 ﻿
-using OpenTKMiniEngine.Rendering.Vertices;
+namespace OpenTKEngine.Rendering.Meshes;
 
-namespace OpenTKMiniEngine.Rendering.Meshes;
+public class Mesh<V> where V : unmanaged {
 
-public class Mesh<V> where V : IVertex {
-
-	public readonly V[] Vertices;
+	public V[] Vertices { get; protected init; }
 
 	public Mesh(params V[] vertices) {
 		Vertices = vertices;
