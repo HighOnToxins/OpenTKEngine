@@ -8,7 +8,7 @@ public class ShaderProgram : GLObject {
 
 	//fields
 	private readonly ProgramHandle _shaderProgram;
-	private readonly Dictionary<string, string> _nameByLabel;
+	private readonly (string label, string name)[] _nameByLabel;
 
 	//properties
 	public override ObjectIdentifier Identifier { get => ObjectIdentifier.Program; }
@@ -16,12 +16,8 @@ public class ShaderProgram : GLObject {
 
 	//constructor
 	public ShaderProgram(string vertPath, string fragPath, params (string label, string name)[] nameByLabel) {
-		_nameByLabel = new Dictionary<string, string>();
+		_nameByLabel = nameByLabel;
 
-		for(int i = 0; i < nameByLabel.Length; i++) {
-			_nameByLabel.Add(nameByLabel[i].label, nameByLabel[i].name);
-		}
-		
 		_shaderProgram = GL.CreateProgram();
 
 		Shader vertexShader = new(vertPath, _shaderProgram, ShaderType.VertexShader);
@@ -136,7 +132,9 @@ public class ShaderProgram : GLObject {
 		for(int i = 0; i < variableLocations.Length; i++) {
 
 			int location = GetVariableLocation(variableNames[i]);
-			if(location < 0) throw new ArgumentException("Variable name was not found.");
+			if(location < 0) {
+				throw new ArgumentException("Variable name was not found.");
+			}
 			variableLocations[i] = (uint)location;
 		}
 
@@ -144,11 +142,25 @@ public class ShaderProgram : GLObject {
 	}
 
 	public string? GetNameFromLabel(string label) {
-		if(_nameByLabel.TryGetValue(label, out string? location)) {
-			return location;
+		for(int i = 0; i < _nameByLabel.Length; i++) {
+			if(_nameByLabel[i].label == label) {
+				return _nameByLabel[i].name;
+			}
 		}
-
 		return null;
 	}
 
+	public string[] GetNamesFromLabel(string label) {
+		List<string> names = new();
+		for(int i = 0; i < _nameByLabel.Length; i++) {
+			if(_nameByLabel[i].label == label) {
+				names.Add(_nameByLabel[i].name);
+			}
+		}
+		return names.ToArray();
+	}
+
+	public uint[] GetLocationsFromLabel(string label) {
+		return GetVariableLocations(GetNamesFromLabel(label));
+	}
 }

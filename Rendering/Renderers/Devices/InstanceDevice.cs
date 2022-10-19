@@ -6,29 +6,23 @@ using OpenTKEngine.Rendering.Meshes;
 
 namespace OpenTKEngine.Rendering.Renderers.Devices;
 
-//types
-public record InstanceRenderingInfo(
-	bool IsStatic,
-	string[] MeshFieldNames,
-	params string[] InstanceFieldNames
-);
+public class InstanceDevice<I> : RenderingDevice where I : unmanaged {
 
-public class InstanceDevice <V, I> : MeshDevice<V> where V : unmanaged where I : unmanaged{
+	//constants
+	public const string InstanceFieldLabel = "instanceField";
 
 	//fields
-	private ArrayBuffer<I> _instanceBuffer;
+	private VertexBuffer<I> _instanceBuffer;
 	private readonly List<I> _instanceData;
 
-	private readonly bool _isStatic;
 	private readonly uint[] _instanceFieldLocations;
 	protected int _instanceCount;
 
 	//constructor
-	public InstanceDevice(Mesh<V> mesh, ShaderProgram shaderProgram, InstanceRenderingInfo info) : 
-		base(mesh, shaderProgram, info.MeshFieldNames) {
+	public InstanceDevice(Mesh mesh, ShaderProgram shaderProgram) :
+		base(mesh, shaderProgram) {
 
-		_isStatic = info.IsStatic;
-		_instanceFieldLocations = ShaderProgram.GetVariableLocations(info.InstanceFieldNames);
+		_instanceFieldLocations = ShaderProgram.GetLocationsFromLabel(InstanceFieldLabel);
 		_instanceCount = 0;
 
 		_instanceData = new List<I>();
@@ -40,15 +34,10 @@ public class InstanceDevice <V, I> : MeshDevice<V> where V : unmanaged where I :
 	//adding data about instance
 	public void AddInstanceData(I instance) =>
 		_instanceData.Add(instance);
-		
-	//render update
-	public override void RenderUpdate(FrameEventArgs obj, GameWindow win) {}
 
 	//render
 	public override void Render() {
-		if(!_isStatic) {
-			PreDraw();
-		}
+		PreDraw();
 		base.Render();
 	}
 
@@ -66,7 +55,11 @@ public class InstanceDevice <V, I> : MeshDevice<V> where V : unmanaged where I :
 
 	//draw
 	protected override void Draw() {
-		GL.DrawArraysInstanced(PrimitiveType.Triangles, 0, VerticiesPrInstance, _instanceCount);
+		if(Mesh.HasNoElements) {
+			GL.DrawArraysInstanced(PrimitiveType.Triangles, 0, Mesh.VertexCount, _instanceCount); 
+		} else {
+			GL.DrawElementsInstanced(PrimitiveType.Triangles, Mesh.ElementCount, DrawElementsType.UnsignedShort, 0, _instanceCount);
+		}
 	}
 
 	public override void Unload() {

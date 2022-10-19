@@ -8,6 +8,6 @@ uniform mat4 uScr;
 out vec4 fColor;
 
 void main(){
-	gl_Position = vec4(vPos, 1) * uScr;
+	gl_Position = uScr * vec4(vPos, 1);
 	fColor = vColor;
 }

@@ -4,7 +4,7 @@ using OpenTKEngine.Rendering;
 using OpenTKEngine.Rendering.Renderers.Camera;
 using OpenTKEngine.Scenes.Components;
 
-namespace OpenTKMiniEngine.Rendering.Renderers.Camera;
+namespace OpenTKEngine.Rendering.Renderers.Camera;
 
 public class CameraDevice : IRenderingComponent {
 
@@ -36,7 +36,7 @@ public class CameraDevice : IRenderingComponent {
 	//update before render
 	public void RenderUpdate(FrameEventArgs obj, GameWindow window) {
 		for(int i = 0; i < _uniformLocations.Length; i++) {
-			_shaderPrograms[i].SetUniform(_uniformLocations[i], _camera.World2Screen, true);
+			_shaderPrograms[i].SetUniform(_uniformLocations[i], _camera.World2Screen, false);
 		}
 	}
 

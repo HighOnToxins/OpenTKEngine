@@ -4,7 +4,7 @@ using OpenTK.Graphics.OpenGL;
 
 namespace OpenTKEngine.Rendering;
 
-public class ArrayBuffer <V> : GLObject where V : unmanaged{
+public class VertexBuffer <V> : GLObject where V : unmanaged{
 
 	//fields
 	private readonly int _dataLength;
@@ -16,7 +16,7 @@ public class ArrayBuffer <V> : GLObject where V : unmanaged{
 	public BufferTargetARB Target { get; init; }
 
 	//constructor
-	public ArrayBuffer(BufferTargetARB target, V[] data, BufferUsageARB usage) {
+	public VertexBuffer(BufferTargetARB target, V[] data, BufferUsageARB usage) {
 		_dataLength = data.Length;
 
 		Target = target;

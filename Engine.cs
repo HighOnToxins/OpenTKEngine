@@ -117,7 +117,9 @@ public class Engine {
 		else _window.WindowState = WindowState.Fullscreen;
 	}
 
-	public Matrix4 GetPixelToScreenMatrix() {
-		return Matrix4.CreateOrthographicOffCenter(0, _window.ClientSize.X, 0, _window.ClientSize.Y, -1, 1);
+	public static Vector2 PixelToScreen(Vector2 pixel, GameWindow window) {
+		Vector2 screenPositionOff = (new Vector4(pixel, 0, 1) * Matrix4.CreateOrthographicOffCenter(0, window.ClientSize.X, 0, window.ClientSize.Y, -1, 1)).Xy;
+		Vector2 screenPosition = new Vector2(screenPositionOff.X, -screenPositionOff.Y);
+		return screenPosition;
 	}
 }

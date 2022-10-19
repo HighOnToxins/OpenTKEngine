@@ -9,7 +9,7 @@ public class Camera : IReadOnlyCamera {
 	public Vector3 Position { get; set; }
 	public Vector3 Direction { get; set; }
 	public float Scale { get; set; }
-	public double Angle { get; set; }
+	public float Angle { get; set; }
 
 	public float Left { get; set; }
 	public float Right { get; set; }
@@ -20,7 +20,7 @@ public class Camera : IReadOnlyCamera {
 
 	public Vector3 Up { get; set; }
 	public Vector3 CameraUp {
-		get => (new Vector4(Up, 1) * Util.RotateAxis(Direction, Angle)).Xyz;
+		get => (new Vector4(Up, 1) * Matrix4.CreateFromAxisAngle(Direction, Angle)).Xyz;
 		set{ 
 			Up = value;
 			Angle = 0;
@@ -30,7 +30,7 @@ public class Camera : IReadOnlyCamera {
 	private readonly bool _isOrthographic;
 	
 	//constructor
-	public Camera(Vector3 position, Vector3 direction, double angle, float scale, Vector3 up, bool isOrthographic) {
+	public Camera(Vector3 position, Vector3 direction, float angle, float scale, Vector3 up, bool isOrthographic) {
 		Position = position;
 		Direction = direction;
 		Scale = scale;
