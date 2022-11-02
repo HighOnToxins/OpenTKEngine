@@ -6,16 +6,29 @@ using OpenTKEngine.Scenes;
 
 namespace OpenTKEngine;
 
-public class Engine {
+/*
+ Manage NuGet packages -> OpenTK (include prerelease [V] )
 
-	/*
-	TODO: Static shader info for variable and path names.
-	TODO: ColorRenderer, that uses Vecter3 (position), Matrices and a Vector4 (color)
-	TODO: TextureRenderer, that uses TextureVertex, Matrices and a TextureNum (int)
-	TODO: EntityRenderer, that takes a list of IReadonlyEntity
+OpenTKEngine.csproj:
+	<ItemGroup>
+		<None Update="Shaders\**\*.*">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
+ */
+
+public class TKEngine {
+
+    /*
+		TODO: Add stuff to the engine.
+		- Mesh creators/handling.
+		- Shader info gathering.
+		- TextureRenderer (TextureVertex, Matrix, TextureNum)
+		- EntityRenderer (List<IReadonlyEntity>)
+		- Scene gathering/handling.
 	*/
 
-	public readonly struct EngineOptions {
+    public readonly struct EngineOptions {
 		public int Width { internal get; init; }
 		public int Height { internal get; init; }
 		public string Title { internal get; init; }
@@ -38,7 +51,7 @@ public class Engine {
 
 	public float Ratio; //width divided by height
 
-	public Engine(Func<IScene> initScene, EngineOptions options) { 
+	public TKEngine(Func<IScene> initScene, EngineOptions options) { 
 
 		_window = new GameWindow(GameWindowSettings.Default,
 			new NativeWindowSettings {
@@ -60,8 +73,12 @@ public class Engine {
 	private void Load() {
 
 		GL.Enable(EnableCap.DepthTest);
+        GL.Disable(EnableCap.CullFace);
+        GL.Enable(EnableCap.Blend);
+        GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.DstAlpha);
+        GL.Enable(EnableCap.Normalize);
 
-		_scene = _initScene();
+        _scene = _initScene();
 
 		_window.Resize += Resize;
 		_window.RenderFrame += RenderFrame;

@@ -1,12 +1,10 @@
 ﻿
 using OpenTK.Graphics.OpenGL;
-using OpenTK.Windowing.Common;
-using OpenTK.Windowing.Desktop;
 using OpenTKEngine.Rendering.Meshes;
 
 namespace OpenTKEngine.Rendering.Renderers.Devices;
 
-public class InstanceDevice<I> : RenderingDevice where I : unmanaged {
+public class InstanceDevice<I> : MeshDevice where I : unmanaged {
 
 	//constants
 	public const string InstanceFieldLabel = "instanceField";
@@ -45,7 +43,8 @@ public class InstanceDevice<I> : RenderingDevice where I : unmanaged {
 		if(_instanceData.Count != _instanceCount) {
 			_instanceCount = _instanceData.Count;
 
-			_instanceBuffer = new(BufferTargetARB.ArrayBuffer, _instanceData.ToArray(), BufferUsageARB.DynamicDraw);
+            _instanceBuffer.Dispose();
+            _instanceBuffer = new(BufferTargetARB.ArrayBuffer, _instanceData.ToArray(), BufferUsageARB.DynamicDraw);
 			VertexArray.SetBuffer(_instanceBuffer, 1, _instanceFieldLocations);
 		} else {
 			_instanceBuffer.BufferData(_instanceData.ToArray(), BufferUsageARB.DynamicDraw);

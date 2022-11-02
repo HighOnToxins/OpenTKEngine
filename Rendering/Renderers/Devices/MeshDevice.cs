@@ -7,7 +7,7 @@ using OpenTKEngine.Scenes.Components;
 
 namespace OpenTKEngine.Rendering.Renderers.Devices;
 
-public class RenderingDevice : IRenderingComponent {
+public class MeshDevice : IRenderingComponent {
 
 	//constants
 	public const string MeshFieldsLabel = "meshField";
@@ -18,7 +18,7 @@ public class RenderingDevice : IRenderingComponent {
 	protected VertexArray VertexArray { get; private init; }
 
 	//constructor
-	public RenderingDevice(Mesh mesh, ShaderProgram shaderProgram) {
+	public MeshDevice(Mesh mesh, ShaderProgram shaderProgram) {
 		ShaderProgram = shaderProgram;
 		VertexArray = mesh.CreateVertexArray(shaderProgram.GetLocationsFromLabel(MeshFieldsLabel));
 
