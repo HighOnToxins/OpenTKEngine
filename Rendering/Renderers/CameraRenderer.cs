@@ -1,6 +1,6 @@
 ﻿using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
-using OpenTKEngine.Rendering.Renderers.Camera;
+using OpenTKEngine.Rendering.Items;
 using OpenTKEngine.Scenes.Components;
 
 namespace OpenTKEngine.Rendering.Renderers;
@@ -28,7 +28,7 @@ public class CameraRenderer: IRenderingComponent {
         _shaderPrograms.Add(shader);
         _uniformLocations.Add(
             (shader.GetUniformLocation(shader.UniformNames.First(n => n == UniformProjName)),
-            shader.GetUniformLocation(shader.UniformNames.First(n => n == UniformProjName))));
+            shader.GetUniformLocation(shader.UniformNames.First(n => n == UniformViewName))));
     }
 
     //update before render

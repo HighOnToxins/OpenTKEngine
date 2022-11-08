@@ -2,7 +2,7 @@
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
-using OpenTKEngine.Rendering.Meshes;
+using OpenTKEngine.Rendering.Items;
 using OpenTKEngine.Scenes.Components;
 
 namespace OpenTKEngine.Rendering.Renderers;
@@ -28,11 +28,11 @@ public class MeshRenderer: IRenderingComponent {
         VertexArray = Mesh.CreateVertexArray(ShaderProgram.VariableNames
             .Where(n => n.Contains(MeshFieldNameInclusion, StringComparison.OrdinalIgnoreCase))
             .Select(n => ShaderProgram.GetVariableLocation(n))
-            .ToArray()); 
+            .ToArray());
     }
 
     /// <summary> An update happening before any draw method is called. </summary>
-    public void RenderUpdate(FrameEventArgs obj, GameWindow win) { }
+    public virtual void RenderUpdate(FrameEventArgs obj, GameWindow win) { }
 
     protected virtual void Draw() {
         if(Mesh.HasNoElements) {

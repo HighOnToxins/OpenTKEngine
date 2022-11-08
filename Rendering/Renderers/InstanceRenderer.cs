@@ -1,6 +1,6 @@
 ﻿
 using OpenTK.Graphics.OpenGL;
-using OpenTKEngine.Rendering.Meshes;
+using OpenTKEngine.Rendering.Items;
 
 namespace OpenTKEngine.Rendering.Renderers;
 
@@ -19,13 +19,11 @@ public class InstanceRenderer<I>: MeshRenderer where I : unmanaged {
     public InstanceRenderer(Mesh mesh) :
         base(mesh) {
 
-        _instanceFieldLocations = Array.Empty<uint>();
         _instanceCount = 0;
-
         _instanceData = new List<I>();
 
+        _instanceFieldLocations = Array.Empty<uint>();
         _instanceBuffer = new(BufferTargetARB.ArrayBuffer, _instanceData.ToArray(), BufferUsageARB.DynamicDraw);
-        VertexArray.SetBuffer(_instanceBuffer, 1, _instanceFieldLocations);
     }
 
     public override void AssignShader(ShaderProgram shader) {
@@ -35,11 +33,12 @@ public class InstanceRenderer<I>: MeshRenderer where I : unmanaged {
             .Where(v => v.Contains(InstanceFieldNameInclusion, StringComparison.OrdinalIgnoreCase))
             .Select(v => shader.GetVariableLocation(v))
             .ToArray();
+        VertexArray.SetBuffer(_instanceBuffer, 1, _instanceFieldLocations);
     }
 
 
     //adding data about instance
-    public void AddInstanceData(I instance) =>
+    public virtual void AddInstanceData(I instance) =>
         _instanceData.Add(instance);
 
     //render

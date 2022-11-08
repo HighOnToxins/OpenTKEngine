@@ -7,12 +7,12 @@ namespace OpenTKEngine.Scenes.Components;
 public interface IRenderingComponent {
 
 
-	public void AssignShader(ShaderProgram shader);
+    public void AssignShader(ShaderProgram shader);
 
-	public void RenderUpdate(FrameEventArgs obj, GameWindow window);
+    public void RenderUpdate(FrameEventArgs obj, GameWindow window);
 
-	public void Render();
+    public void Render();
 
-	public void Unload();
+    public void Unload();
 
 }

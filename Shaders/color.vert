@@ -1,24 +1,21 @@
 ﻿#version 330 core
 
-//Mesh variables Matrix
 in vec3 vMeshPos;
-in vec4 vMeshColor;
 
-//Instance Matrix
-in vec4 vInstMatrix0;
-in vec4 vInstMatrix1;
-in vec4 vInstMatrix2;
-in vec4 vInstMatrix3;
+in vec4 vInstMod0;
+in vec4 vInstMod1;
+in vec4 vInstMod2;
+in vec4 vInstMod3;
 
-//Camera Uniforms
+in vec4 vInstColor;
+
 uniform mat4 uView;
 uniform mat4 uProj;
 
-//Coloring for Fragment
 out vec4 fColor;
 
 void main(){
-	mat4 inst = mat4(vInstMatrix0, vInstMatrix1, vInstMatrix2, vInstMatrix3);
-	gl_Position = uView * uProj * inst * vec4(vPos, 1);
-	fColor = vColor;
+	mat4 model = mat4(vInstMod0, vInstMod1, vInstMod2, vInstMod3);
+	gl_Position = vec4(vMeshPos, 1) * model * uView * uProj;
+	fColor = vInstColor;
 }
