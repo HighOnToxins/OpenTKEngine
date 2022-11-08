@@ -1,13 +1,14 @@
 ﻿#version 330 core
 
+//Inputs from Vertex
 in vec2 fTexPos;
-flat in float fTexNum;
-	
-uniform sampler2D[2] uTexes;
+flat in int fTexNum;
+
+//All current Textures
+uniform sampler2D[2] uTexs;
 
 out vec4 Color;
 
 void main(){
-	int index = int(fTexNum);
-	Color = texture(uTexes[index], fTexPos);
+	Color = texture(uTexs[fTexNum], fTexPos);
 }

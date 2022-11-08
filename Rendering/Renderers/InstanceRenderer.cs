@@ -32,7 +32,7 @@ public class InstanceRenderer<I>: MeshRenderer where I : unmanaged {
         base.AssignShader(shader);
 
         _instanceFieldLocations = shader.VariableNames
-            .Where(v => v.Contains(InstanceFieldNameInclusion))
+            .Where(v => v.Contains(InstanceFieldNameInclusion, StringComparison.OrdinalIgnoreCase))
             .Select(v => shader.GetVariableLocation(v))
             .ToArray();
     }

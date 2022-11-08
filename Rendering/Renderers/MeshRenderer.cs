@@ -26,7 +26,7 @@ public class MeshRenderer: IRenderingComponent {
     public virtual void AssignShader(ShaderProgram shader) {
         ShaderProgram = shader;
         VertexArray = Mesh.CreateVertexArray(ShaderProgram.VariableNames
-            .Where(n => n.Contains(MeshFieldNameInclusion))
+            .Where(n => n.Contains(MeshFieldNameInclusion, StringComparison.OrdinalIgnoreCase))
             .Select(n => ShaderProgram.GetVariableLocation(n))
             .ToArray()); 
     }
