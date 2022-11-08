@@ -8,22 +8,27 @@ public class ShaderProgram : GLObject {
 
 	//fields
 	private readonly ProgramHandle _shaderProgram;
-	private readonly (string label, string name)[] _nameByLabel;
 
 	//properties
 	public override ObjectIdentifier Identifier { get => ObjectIdentifier.Program; }
 	public override uint Handle { get => (uint)_shaderProgram.Handle; }
 
-	//constructor
-	public ShaderProgram(string vertPath, string fragPath, params (string label, string name)[] nameByLabel) {
-		_nameByLabel = nameByLabel;
+	//shader data (variables and such)
+	public IEnumerable<string> VariableNames;
+    public IEnumerable<string> UniformNames;
+
+    //constructor
+    public ShaderProgram(string vertPath, string fragPath) {
 
 		_shaderProgram = GL.CreateProgram();
 
 		Shader vertexShader = new(vertPath, _shaderProgram, ShaderType.VertexShader);
 		Shader fragmentShader = new(fragPath, _shaderProgram, ShaderType.FragmentShader);
 
-		vertexShader.Bind();
+        VariableNames = vertexShader.VariableNames.Concat(fragmentShader.VariableNames);
+        UniformNames = vertexShader.UniformNames.Concat(fragmentShader.UniformNames);
+
+        vertexShader.Bind();
 		fragmentShader.Bind();
 
 		GL.LinkProgram(_shaderProgram);
@@ -37,6 +42,12 @@ public class ShaderProgram : GLObject {
 		fragmentShader.Unbind();
 		vertexShader.Dispose();
 		fragmentShader.Dispose();
+
+	}
+
+	private ShaderProgram() {
+		VariableNames = new List<string>();
+		UniformNames = new List<string>();
 	}
 
 	// - - - GLObject Methods - - - 
@@ -55,112 +66,68 @@ public class ShaderProgram : GLObject {
 #pragma warning restore CA1816 // Dispose methods should call SuppressFinalize
 
 	// - - - Shader Methods - - - 
-	public void SetUniform(string name, float value) {
-		int location = GetUniformVariableLocation(name);
+	public void SetUniform(int location, float value) {
 		Bind();
 		GL.Uniform1f(location, value);
 		Unbind();
 	}
 
-	public void SetUniform(string name, int value) {
-		int location = GetUniformVariableLocation(name);
+	public void SetUniform(int location, int value) {
 		Bind();
 		GL.Uniform1i(location, value);
 		Unbind();
 	}
 
-	public void SetUniform(string name, double value) {
-		int location = GetUniformVariableLocation(name);
+	public void SetUniform(int location, double value) {
 		Bind();
 		GL.Uniform1d(location, value);
 		Unbind();
 	}
 
-	public void SetUniform(string name, int[] values) {
-		int location = GetUniformVariableLocation(name);
+	public void SetUniform(int location, int[] values) {
 		Bind();
 		GL.Uniform1i(location, values.Length, values);
 		Unbind();
 	}
 
-	public void SetUniform(string name, Vector2 value) {
-		int location = GetUniformVariableLocation(name);
+	public void SetUniform(int location, Vector2 value) {
 		Bind();
 		GL.Uniform2f(location, value);
 		Unbind();
 	}
 
-	public void SetUniform(string name, Vector2d value) {
-		int location = GetUniformVariableLocation(name);
+	public void SetUniform(int location, Vector2d value) {
 		Bind();
 		GL.Uniform2d(location, value);
 		Unbind();
 	}
 
-	public void SetUniform(string name, Vector3 value) {
-		int location = GetUniformVariableLocation(name);
+	public void SetUniform(int location, Vector3 value) {
 		Bind();
 		GL.Uniform3f(location, value);
 		Unbind();
 	}
 
-	public void SetUniform(string name, Matrix4 value, bool transpose) {
-		int location = GetUniformVariableLocation(name);
+	public void SetUniform(int location, Matrix4 value, bool transpose) {
 		Bind();
 		GL.UniformMatrix4f(location, transpose, value);
 		Unbind();
 	}
 
-	public void SetUniform(string name, Matrix4d value, bool transpose) {
-		int location = GetUniformVariableLocation(name);
+	public void SetUniform(int location, Matrix4d value, bool transpose) {
 		Bind();
 		GL.UniformMatrix4d(location, transpose, value);
 		Unbind();
 	}
 
-	public int GetVariableLocation(string variableName) {
-		return GL.GetAttribLocation(_shaderProgram, variableName);
+	public uint GetVariableLocation(string variableName) {
+		return (uint)GL.GetAttribLocation(_shaderProgram, variableName);
 	}
 
-	public int GetUniformVariableLocation(string variableName) {
+	public int GetUniformLocation(string variableName) {
 		return GL.GetUniformLocation(_shaderProgram, variableName);
 	}
 
-	public uint[] GetVariableLocations(params string[] variableNames) {
-		uint[] variableLocations = new uint[variableNames.Length];
+	public static ShaderProgram EmptyShader => new();
 
-		for(int i = 0; i < variableLocations.Length; i++) {
-
-			int location = GetVariableLocation(variableNames[i]);
-			if(location < 0) {
-				throw new ArgumentException("Variable name was not found.");
-			}
-			variableLocations[i] = (uint)location;
-		}
-
-		return variableLocations;
-	}
-
-	public string? GetNameFromLabel(string label) {
-		for(int i = 0; i < _nameByLabel.Length; i++) {
-			if(_nameByLabel[i].label == label) {
-				return _nameByLabel[i].name;
-			}
-		}
-		return null;
-	}
-
-	public string[] GetNamesFromLabel(string label) {
-		List<string> names = new();
-		for(int i = 0; i < _nameByLabel.Length; i++) {
-			if(_nameByLabel[i].label == label) {
-				names.Add(_nameByLabel[i].name);
-			}
-		}
-		return names.ToArray();
-	}
-
-	public uint[] GetLocationsFromLabel(string label) {
-		return GetVariableLocations(GetNamesFromLabel(label));
-	}
 }

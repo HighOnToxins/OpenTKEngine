@@ -15,8 +15,12 @@ public sealed class Shader : GLObject{
 	public override ObjectIdentifier Identifier { get => ObjectIdentifier.Shader; }
 	public override uint Handle { get => (uint)_shaderObject.Handle; }
 
-	//constructor
-	public Shader(string shaderPath, ProgramHandle program, ShaderType type) {
+    //info
+    public IEnumerable<string> VariableNames;
+    public IEnumerable<string> UniformNames;
+
+    //constructor
+    public Shader(string shaderPath, ProgramHandle program, ShaderType type) {
 		_shaderProgram = program;
 
 		string shaderCode;
@@ -24,6 +28,9 @@ public sealed class Shader : GLObject{
 		using(StreamReader reader = new(shaderPath, Encoding.UTF8)) {
 			shaderCode = reader.ReadToEnd();
 		}
+
+		VariableNames = GetNames(shaderCode, "in");
+		UniformNames = GetNames(shaderCode, "uniform");
 
 		_shaderObject = GL.CreateShader(type);
 		GL.ShaderSource(_shaderObject, shaderCode);
@@ -33,6 +40,23 @@ public sealed class Shader : GLObject{
 		if(!string.IsNullOrEmpty(infoLog)) {
 			throw new Exception($"Shader compile error: {infoLog}");
 		}
+	}
+
+	private static IEnumerable<string> GetNames(string shaderCode, string searchType) {
+		int indexOfType = shaderCode.IndexOf(searchType, 0);
+
+        do {
+			int indexOfVar = shaderCode.IndexOf(' ', indexOfType, 2);
+			int endOfVar = shaderCode.IndexOf(' ', indexOfVar) - 1;
+
+			yield return shaderCode.Substring(indexOfVar, endOfVar - indexOfVar + 1);
+
+            indexOfType = shaderCode.IndexOf(searchType, indexOfType);
+        } while(indexOfType == -1);
+	}
+
+	private static List<string> GetVariableNames(string shaderCode) {
+		throw new NotImplementedException();
 	}
 
 	public override void Bind() =>

@@ -15,12 +15,17 @@ public sealed class VertexArray : GLObject{
 	public override ObjectIdentifier Identifier { get => ObjectIdentifier.VertexArray; }
 	public override uint Handle { get => (uint)_vertexArrayObject.Handle; }
 
+	public static VertexArray EmptyVertex => new(false);
+
 	//constructors
 	public VertexArray() {
 		_vertexArrayObject = GL.GenVertexArray();
 	}
 
-	private void SetAttribute<V>(VertexBuffer<V> buffer, 
+
+    public VertexArray(bool b) {}
+
+    private void SetAttribute<V>(VertexBuffer<V> buffer, 
 			uint index, int count, 
 			VertexAttribPointerType type, 
 			int stride, int offset, uint divisor = 0)
