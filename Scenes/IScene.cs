@@ -1,6 +1,6 @@
 ﻿using OpenTK.Windowing.Common;
 
-namespace OpenTKEngine;
+namespace OpenTKEngine.Scenes;
 
 public interface IScene
 {
@@ -16,5 +16,5 @@ public interface IScene
     void MouseLeave();
 
     void Unload();
-    void Update(FrameEventArgs obj);
+    void Update(FrameEventArgs obj, EngineWindow engineWindow);
 }

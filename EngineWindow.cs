@@ -2,6 +2,7 @@
 using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
+using OpenTKEngine.Scenes;
 using System.Diagnostics;
 
 namespace OpenTKEngine;
@@ -96,12 +97,11 @@ public sealed class EngineWindow
     
     private void RenderFrame(FrameEventArgs obj)
     {
-        if(scene == null) return;
         _thisTime = Stopwatch.GetTimestamp();
         DeltaTime = (float)(_thisTime - _prevTime) / Stopwatch.Frequency;
 
         GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-        scene.Update(obj);
+        scene.Update(obj, this);
         window.SwapBuffers();
 
         _prevTime = _thisTime;
