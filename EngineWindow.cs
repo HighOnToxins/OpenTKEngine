@@ -36,6 +36,8 @@ public sealed class EngineWindow
     private long _thisTime;
     public double DeltaTime { get; private set; }
 
+    public Vector2 MousePosition => window.MousePosition;
+
     public void Run()
     {
         _prevTime = Stopwatch.GetTimestamp();
