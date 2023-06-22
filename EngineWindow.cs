@@ -3,6 +3,7 @@ using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
 using OpenTKEngine.Scenes;
+using OpenTKEngine.Utility;
 using System.Diagnostics;
 
 namespace OpenTKEngine;
@@ -113,10 +114,10 @@ public sealed class EngineWindow
         else window.WindowState = WindowState.Fullscreen;
     }
 
-    public static Vector2 PixelToScreen(Vector2 pixel, GameWindow window)
+    public Vector2 PixelToScreen(Vector2 pixel)
     {
-        Vector2 screenPositionOff = (new Vector4(pixel, 0, 1) * Matrix4.CreateOrthographicOffCenter(0, window.ClientSize.X, 0, window.ClientSize.Y, -1, 1)).Xy;
-        Vector2 screenPosition = new(screenPositionOff.X, -screenPositionOff.Y);
-        return screenPosition;
+        return new(
+            Util.Rlerp(pixel.X, 0, window.ClientSize.X, -1, 1),
+            Util.Rlerp(pixel.Y, window.ClientSize.Y, 0, -1, 1));
     }
 }

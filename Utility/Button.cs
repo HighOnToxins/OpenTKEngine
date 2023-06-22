@@ -1,5 +1,5 @@
 ﻿
-namespace OpenTKEngine.Util;
+namespace OpenTKEngine.Utility;
 
 public class Button : Entity
 {
