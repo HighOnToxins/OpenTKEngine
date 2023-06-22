@@ -1,4 +1,5 @@
 ﻿using OpenTK.Windowing.Common;
+using System.ComponentModel;
 
 namespace OpenTKEngine.Scenes;
 
@@ -15,6 +16,6 @@ public interface IScene
     void MouseEnter();
     void MouseLeave();
 
-    void Unload();
-    void Update(FrameEventArgs obj, EngineWindow engineWindow);
+    void Unload(CancelEventArgs args);
+    void Update(EngineWindow engineWindow);
 }

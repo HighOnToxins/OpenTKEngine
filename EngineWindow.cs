@@ -11,12 +11,14 @@ namespace OpenTKEngine;
 public sealed class EngineWindow
 {
 
-    private readonly GameWindow window;
-    private readonly IScene scene;
+    private readonly NativeWindow window;
+    private readonly Func<IScene> sceneInit;
 
-    public EngineWindow(IScene scene, string title, Vector2i size)
+    private bool Running;
+
+    public EngineWindow(Func<IScene> sceneInit, string title, Vector2i size)
     {
-        window = new GameWindow(GameWindowSettings.Default,
+        window = new NativeWindow(
             new NativeWindowSettings
             {
                 Title = title,
@@ -24,30 +26,11 @@ public sealed class EngineWindow
             }
         );
 
-        this.scene = scene;
+        this.sceneInit = sceneInit;
         Ratio = -1;
 
-        window.Load += Load;
-    }
+        window.VSync = VSyncMode.Off;
 
-    public float Ratio { get; set; }
-
-    private long _prevTime;
-    private long _thisTime;
-    public double DeltaTime { get; private set; }
-
-    public Vector2 MousePosition => window.MousePosition;
-
-    public void Run()
-    {
-        _prevTime = Stopwatch.GetTimestamp();
-        _thisTime = Stopwatch.GetTimestamp();
-
-        window.Run();
-    }
-
-    private void Load()
-    {
         GL.Enable(EnableCap.DepthTest);
         GL.Disable(EnableCap.CullFace);
         GL.Enable(EnableCap.Blend);
@@ -55,20 +38,51 @@ public sealed class EngineWindow
         GL.Enable(EnableCap.Normalize);
 
         window.Resize += Resize;
-        window.RenderFrame += RenderFrame;
+    }
 
-        window.Unload += scene.Unload;
+    public double DeltaTime { get; private set; }
 
+    public float Ratio { get; set; }
+
+    public Vector2 MousePosition => window.MousePosition;
+
+    public void Run()
+    {
+        IScene scene = sceneInit.Invoke();
+
+        window.Closing += scene.Unload;
         window.KeyUp += scene.KeyUp;
         window.KeyDown += scene.KeyDown;
-
         window.MouseUp += scene.MouseUp;
         window.MouseDown += scene.MouseDown;
         window.MouseMove += scene.MouseMove;
-
         window.MouseWheel += scene.MouseWheel;
         window.MouseEnter += scene.MouseEnter;
         window.MouseLeave += scene.MouseLeave;
+
+        Running = true;
+
+        long prevTime = Stopwatch.GetTimestamp();
+        long thisTime;
+
+        while(Running)
+        {
+            thisTime = Stopwatch.GetTimestamp();
+            DeltaTime = (float)(thisTime - prevTime) / Stopwatch.Frequency;
+
+            NativeWindow.ProcessWindowEvents(false);
+            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+
+            scene.Update(this);
+            window.Context.SwapBuffers();
+
+            prevTime = thisTime;
+        }
+    }
+
+    public void Exit()
+    {
+        Running = false;
     }
 
     private void Resize(ResizeEventArgs obj)
@@ -98,18 +112,6 @@ public sealed class EngineWindow
             screenSize.X, screenSize.Y);
     }
     
-    private void RenderFrame(FrameEventArgs obj)
-    {
-        _thisTime = Stopwatch.GetTimestamp();
-        DeltaTime = (float)(_thisTime - _prevTime) / Stopwatch.Frequency;
-
-        GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-        scene.Update(obj, this);
-        window.SwapBuffers();
-
-        _prevTime = _thisTime;
-    }
-
     public void ToggleFullscreen()
     {
         if(window.IsFullscreen) window.WindowState = WindowState.Normal;

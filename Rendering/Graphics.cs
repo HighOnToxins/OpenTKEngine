@@ -8,12 +8,7 @@ public sealed class Graphics
         throw new NotImplementedException();
     }
 
-    public void DrawImage()
-    {
-        throw new NotImplementedException();
-    }
-
-    public void DrawRectangle()
+    public void Draw()
     {
         throw new NotImplementedException();
     }
