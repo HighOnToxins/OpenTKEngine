@@ -5,6 +5,8 @@ namespace OpenTKEngine.Scenes;
 
 public interface IScene
 {
+    void Update(EngineWindow window);
+
     void KeyDown(KeyboardKeyEventArgs args);
     void KeyUp(KeyboardKeyEventArgs args);
 
@@ -16,6 +18,5 @@ public interface IScene
     void MouseEnter();
     void MouseLeave();
 
-    void Unload(CancelEventArgs args);
-    void Update(EngineWindow engineWindow);
+    void Closing(CancelEventArgs args);
 }

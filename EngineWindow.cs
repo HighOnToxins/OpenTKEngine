@@ -50,7 +50,6 @@ public sealed class EngineWindow
     {
         IScene scene = sceneInit.Invoke();
 
-        window.Closing += scene.Unload;
         window.KeyUp += scene.KeyUp;
         window.KeyDown += scene.KeyDown;
         window.MouseUp += scene.MouseUp;
@@ -59,6 +58,7 @@ public sealed class EngineWindow
         window.MouseWheel += scene.MouseWheel;
         window.MouseEnter += scene.MouseEnter;
         window.MouseLeave += scene.MouseLeave;
+        window.Closing += scene.Closing;
 
         Running = true;
 
@@ -71,10 +71,7 @@ public sealed class EngineWindow
             DeltaTime = (float)(thisTime - prevTime) / Stopwatch.Frequency;
 
             NativeWindow.ProcessWindowEvents(false);
-            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-
             scene.Update(this);
-            window.Context.SwapBuffers();
 
             prevTime = thisTime;
         }
