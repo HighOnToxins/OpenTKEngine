@@ -5,7 +5,7 @@ namespace OpenTKEngine.Scenes;
 
 public interface IScene
 {
-    void Update(EngineWindow window);
+    void Update();
 
     void KeyDown(KeyboardKeyEventArgs args);
     void KeyUp(KeyboardKeyEventArgs args);

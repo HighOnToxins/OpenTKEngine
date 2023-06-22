@@ -12,11 +12,11 @@ public sealed class EngineWindow
 {
 
     private readonly NativeWindow window;
-    private readonly Func<IScene> sceneInit;
+    private readonly Func<EngineWindow, IScene> sceneInit;
 
     private bool Running;
 
-    public EngineWindow(Func<IScene> sceneInit, string title, Vector2i size)
+    public EngineWindow(Func<EngineWindow, IScene> sceneInit, string title, Vector2i size)
     {
         window = new NativeWindow(
             new NativeWindowSettings
@@ -48,7 +48,7 @@ public sealed class EngineWindow
 
     public void Run()
     {
-        IScene scene = sceneInit.Invoke();
+        IScene scene = sceneInit.Invoke(this);
 
         window.KeyUp += scene.KeyUp;
         window.KeyDown += scene.KeyDown;
@@ -59,6 +59,7 @@ public sealed class EngineWindow
         window.MouseEnter += scene.MouseEnter;
         window.MouseLeave += scene.MouseLeave;
         window.Closing += scene.Closing;
+        window.Closing += args => Running = false;
 
         Running = true;
 
@@ -71,16 +72,19 @@ public sealed class EngineWindow
             DeltaTime = (float)(thisTime - prevTime) / Stopwatch.Frequency;
 
             NativeWindow.ProcessWindowEvents(false);
-            scene.Update(this);
+            scene.Update();
 
             prevTime = thisTime;
         }
     }
 
-    public void Exit()
+    public void Close()
     {
         Running = false;
+        window.Close();
     }
+
+    public void SwapBuffers() => window.Context.SwapBuffers();
 
     private void Resize(ResizeEventArgs obj)
     {
