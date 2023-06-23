@@ -24,7 +24,7 @@ public sealed class Renderer: IDisposable
     {
         shaderProgram.Bind();
         vertexArray.Bind();
-        GL.DrawArrays(primitiveType, 0, vertexArray.VertexCount);
+        GL.DrawArrays(primitiveType, 0, vertexArray.MaxVertexCount);
     }
 
     public void DrawElements(PrimitiveType primitiveType = PrimitiveType.Triangles)
@@ -42,7 +42,7 @@ public sealed class Renderer: IDisposable
     {
         shaderProgram.Bind();
         vertexArray.Bind();
-        GL.DrawArraysInstanced(primitiveType, 0, vertexArray.VertexCount, instanceCount);
+        GL.DrawArraysInstanced(primitiveType, 0, vertexArray.MaxVertexCount, instanceCount);
     }
 
     public void DrawElementsInstanced(int instanceCount, PrimitiveType primitiveType = PrimitiveType.Triangles)

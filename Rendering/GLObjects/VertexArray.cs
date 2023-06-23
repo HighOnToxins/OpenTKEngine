@@ -8,21 +8,14 @@ public sealed class VertexArray: GLObject
 {
     private readonly VertexArrayHandle arrayHandle;
 
-    private readonly List<(Buffer buffer, int totalSize)> buffers;
-
     public Buffer? ElementBuffer { get; private set; } 
 
     public VertexArray() 
     {
         arrayHandle = GL.GenVertexArray();
-        buffers = new();
     }    
 
-    public int VertexCount { 
-        get {
-            return buffers[0].buffer.Count / buffers[0].totalSize;
-        } 
-    }
+    public int MaxVertexCount { get; private set; }
 
     public override ObjectIdentifier Identifier => ObjectIdentifier.VertexArray;
 
@@ -90,7 +83,11 @@ public sealed class VertexArray: GLObject
             offset += attributes[i].ArraySize * typeSize;
         }
 
-        buffers.Add((buffer, totalSize));
+        if(divisor == 0)
+        {
+            int vertexCount = buffer.Count / totalSize;
+            if(vertexCount > MaxVertexCount) MaxVertexCount = vertexCount;
+        }
     }
 
     public void SetElementBuffer(Buffer elementBuffer)
