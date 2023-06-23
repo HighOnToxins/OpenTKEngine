@@ -28,9 +28,9 @@ public sealed class VertexArray: GLObject
 
     public override uint Handle => (uint) arrayHandle.Handle;
 
-    public void AddBuffer<T>(VertexBuffer<T> buffer, BufferFields fields, uint divisor = 0) where T : unmanaged
+    public void AddBuffer(Buffer buffer, BufferFields fields, uint divisor = 0)
     {
-        (VertexAttribPointerType pointerType, int typeSize) = typeof(T).Name switch
+        (VertexAttribPointerType pointerType, int typeSize) = buffer.Type.Name switch
         {
             nameof(Byte) =>   (VertexAttribPointerType.UnsignedByte,    sizeof(byte)),
             nameof(SByte) =>  (VertexAttribPointerType.Byte,            sizeof(sbyte)),
