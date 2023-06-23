@@ -61,7 +61,7 @@ public sealed class ShaderProgram: GLObject
             int length = 0;
             int size = 0;
             UniformType type = 0;
-            GL.GetActiveUniform(programHandle, i, maxAttributeLength, ref length, ref size, ref type, out string name);
+            GL.GetActiveUniform(programHandle, i, maxUniformLength, ref length, ref size, ref type, out string name);
             uniforms.Add(name, new ProgramUniform(programHandle, name, size, type));
         }
 
