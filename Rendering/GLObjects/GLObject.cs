@@ -8,16 +8,23 @@ public abstract class GLObject : IDisposable
     public abstract ObjectIdentifier Identifier { get; }
     public abstract uint Handle { get; }
 
+    public GLObject()
+    {
+        int length = 0;
+        label = GL.GetObjectLabel(Identifier, Handle, 255, ref length);
+    }
+
+    private string label;
     public string Label
     {
+        get
+        {
+            return label;
+        }
         set
         {
             GL.ObjectLabel(Identifier, Handle, value.Length, value);
-        }
-        get
-        {
-            int length = 0;
-            return GL.GetObjectLabel(Identifier, Handle, 10, ref length);
+            label = value;
         }
     }
 
