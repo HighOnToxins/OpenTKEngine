@@ -1,9 +1,11 @@
-﻿using OpenTK.Graphics.OpenGL;
+﻿using OpenTK.Graphics;
+using OpenTK.Graphics.OpenGL;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
 using OpenTKEngine.Scenes;
 using OpenTKEngine.Utility;
+using System.ComponentModel;
 using System.Diagnostics;
 
 namespace OpenTKEngine;
@@ -59,7 +61,7 @@ public sealed class EngineWindow
         window.MouseEnter += scene.MouseEnter;
         window.MouseLeave += scene.MouseLeave;
         window.Closing += scene.Closing;
-        window.Closing += args => Running = false;
+        window.Closing += Closing;
 
         Running = true;
 
@@ -85,6 +87,14 @@ public sealed class EngineWindow
     }
 
     public void SwapBuffers() => window.Context.SwapBuffers();
+
+    private void Closing(CancelEventArgs args)
+    {
+        GL.BindBuffer(BufferTargetARB.ArrayBuffer, BufferHandle.Zero);
+        GL.BindVertexArray(VertexArrayHandle.Zero);
+        GL.UseProgram(ProgramHandle.Zero);
+        Running = false;
+    }
 
     private void Resize(ResizeEventArgs obj)
     {
