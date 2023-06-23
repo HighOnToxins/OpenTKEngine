@@ -103,6 +103,23 @@ public class ProgramAttribute {
         Size = size;
         Type = type;
         index = (uint) GL.GetAttribLocation(programHandle, Name);
+
+        ArraySize = type switch
+        {
+            AttributeType.Bool => 1,
+            AttributeType.Int => 1,
+            AttributeType.Float => 1,
+            AttributeType.Double => 1,
+            AttributeType.FloatVec2 => 2,
+            AttributeType.FloatVec3 => 3,
+            AttributeType.FloatVec4 => 4,
+            AttributeType.DoubleVec2 => 2,
+            AttributeType.DoubleVec3 => 3,
+            AttributeType.DoubleVec4 => 4,
+            AttributeType.FloatMat4 => 4*4,
+            AttributeType.DoubleMat4 => 4*4,
+            _ => throw new NotSupportedException("The given attribute type was not supported!"),
+        };
     }
 
     public string Name { get; private set; }
@@ -113,6 +130,8 @@ public class ProgramAttribute {
 
 
     private uint index;
+    public int ArraySize { get; private set; }
+
     public uint Index
     {
         get
