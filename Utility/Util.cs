@@ -19,6 +19,23 @@ public static class Util
     public static float ProjLength(this Vector2 vec1, Vector2 vec2)
         => Vector2.Dot(vec1, vec2) / vec2.LengthSquared * vec2.Length;
 
+    public static AttributeType TypeToAttributeType(Type type) => type.Name switch
+    {
+        nameof(Int32) => AttributeType.Int,
+        nameof(UInt32) => AttributeType.UnsignedInt, 
+        nameof(Single) => AttributeType.Float, 
+        nameof(Double) => AttributeType.Double, 
+        nameof(Vector2) => AttributeType.FloatVec2, 
+        nameof(Vector3) => AttributeType.FloatVec3, 
+        nameof(Vector4) => AttributeType.FloatVec4, 
+        nameof(Vector2d) => AttributeType.DoubleVec2, 
+        nameof(Vector3d) => AttributeType.DoubleVec3, 
+        nameof(Vector4d) => AttributeType.DoubleVec4, 
+        nameof(Matrix4) => AttributeType.FloatMat4, 
+        nameof(Matrix4d) => AttributeType.DoubleMat4, 
+        _ => throw new NotSupportedException("The given attribute type was not supported!"),
+    };
+
     public static VertexAttribPointerType TypeToPointerType(Type type)
         => type.Name switch
     {
@@ -30,29 +47,22 @@ public static class Util
         nameof(UInt32) => VertexAttribPointerType.UnsignedInt,
         nameof(Single) => VertexAttribPointerType.Float,
         nameof(Double) => VertexAttribPointerType.Double,
+        nameof(Vector2) => VertexAttribPointerType.Float,
+        nameof(Vector3) => VertexAttribPointerType.Float,
+        nameof(Vector4) => VertexAttribPointerType.Float,
+        nameof(Vector2d) => VertexAttribPointerType.Double,
+        nameof(Vector3d) => VertexAttribPointerType.Double,
+        nameof(Vector4d) => VertexAttribPointerType.Double,
+        nameof(Matrix4) => VertexAttribPointerType.Float,
+        nameof(Matrix4d) => VertexAttribPointerType.Double,
         _ => throw new NotImplementedException(),
-    };
-
-    public static VertexAttribPointerType AttributeToPointerType(AttributeType type) => type switch
-    {
-        AttributeType.Int => VertexAttribPointerType.Int,
-        AttributeType.Float => VertexAttribPointerType.Float,
-        AttributeType.Double => VertexAttribPointerType.Double,
-        AttributeType.FloatVec2 => VertexAttribPointerType.Float,
-        AttributeType.FloatVec3 => VertexAttribPointerType.Float,
-        AttributeType.FloatVec4 => VertexAttribPointerType.Float,
-        AttributeType.DoubleVec2 => VertexAttribPointerType.Double,
-        AttributeType.DoubleVec3 => VertexAttribPointerType.Double,
-        AttributeType.DoubleVec4 => VertexAttribPointerType.Double,
-        AttributeType.FloatMat4 => VertexAttribPointerType.Float,
-        AttributeType.DoubleMat4 => VertexAttribPointerType.Double,
-        _ => throw new NotSupportedException("The given attribute type was not supported!"),
     };
 
     public static int ValueCount(AttributeType type) => type switch
     {
         AttributeType.Bool => 1,
         AttributeType.Int => 1,
+        AttributeType.UnsignedInt => 1,
         AttributeType.Float => 1,
         AttributeType.Double => 1,
         AttributeType.FloatVec2 => 2,
@@ -66,33 +76,16 @@ public static class Util
         _ => throw new NotSupportedException("The given attribute type was not supported!"),
     };
 
-    public static UniformType UniformTypeOf(this object obj) => obj switch
+    public static int TypeSize(VertexAttribPointerType type) => type switch
     {
-        int =>      UniformType.Int,
-        float =>    UniformType.Float,
-        double =>   UniformType.Double,
-        int[] =>    UniformType.IntSampler1dArray,
-        Vector2 =>  UniformType.FloatVec2,
-        Vector3 =>  UniformType.FloatVec3,
-        Vector4 =>  UniformType.FloatVec4,
-        Vector2d => UniformType.DoubleVec2,
-        Vector3d => UniformType.DoubleVec3,
-        Vector4d => UniformType.DoubleVec4,
-        Matrix4 =>  UniformType.FloatMat4,
-        Matrix4d => UniformType.DoubleMat4,
-        _ => throw new NotSupportedException("The give type was not supported as a uniform."),
-    };
-
-    public static int Size(this Type type) => type.Name switch
-    {
-        nameof(Byte) => sizeof(byte),
-        nameof(SByte) => sizeof(sbyte),
-        nameof(Int16) => sizeof(short),
-        nameof(UInt16) => sizeof(ushort),
-        nameof(Int32) => sizeof(int),
-        nameof(UInt32) => sizeof(uint),
-        nameof(Single) => sizeof(float),
-        nameof(Double) => sizeof(double),
+        VertexAttribPointerType.Byte => sizeof(sbyte),
+        VertexAttribPointerType.UnsignedByte => sizeof(byte),
+        VertexAttribPointerType.Short => sizeof(short),
+        VertexAttribPointerType.UnsignedShort => sizeof(ushort),
+        VertexAttribPointerType.Int => sizeof(int),
+        VertexAttribPointerType.UnsignedInt => sizeof(uint),
+        VertexAttribPointerType.Float => sizeof(float),
+        VertexAttribPointerType.Double => sizeof(double),
         _ => throw new NotSupportedException("The given type was not supported!"),
     };
 }

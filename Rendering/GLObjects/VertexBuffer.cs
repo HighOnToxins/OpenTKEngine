@@ -1,50 +1,41 @@
 ﻿
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
+using OpenTKEngine.Utility;
+using System.Runtime.InteropServices;
 
 namespace OpenTKEngine.Rendering.GLObjects;
 
-public abstract class Buffer: GLObject
+/// <summary> An array over a number of values, with a structure. </summary>
+public interface IBuffer 
 {
-    private readonly BufferHandle bufferHandle;
+    public int Count { get; }
 
-    public Buffer(BufferTargetARB target = BufferTargetARB.ArrayBuffer)
-    {
-        Target = target;
-        bufferHandle = GL.GenBuffer();
-    }
+    public AttributeType[] AttributeTypes { get; }
 
-    protected BufferTargetARB Target { get; private init; }
+    public VertexAttribPointerType ValueType { get; } //TODO: Consider using type class instead such that it is easier to get size, by Marshal.Sizeof().
+   
+    public void Bind();
 
-    public override ObjectIdentifier Identifier => ObjectIdentifier.Buffer;
-
-    public override uint Handle => (uint)bufferHandle.Handle;
-
-    public abstract int Count { get; }
-
-    public abstract Type Type { get; }
-
-    public override void Bind()
-    {
-        GL.BindBuffer(Target, bufferHandle);
-    }
-
-    public override void Dispose()
-    {
-        GL.DeleteBuffer(bufferHandle);
-    }
+    public void Dispose();
 }
 
-//TODO: Change the buffer to automatically, keep track of data.
-public class VertexBuffer<T>: Buffer where T : unmanaged
+public class VertexBuffer<T>: GLObject, IBuffer where T : unmanaged
 {
-    private int count;
+    private readonly BufferHandle bufferHandle;
+    private readonly BufferTargetARB target;
 
-    public VertexBuffer(BufferTargetARB target = BufferTargetARB.ArrayBuffer)  : base(target)
+    public VertexBuffer(BufferTargetARB target = BufferTargetARB.ArrayBuffer)
     {
+        this.target = target;
+        bufferHandle = GL.GenBuffer();
+
+        //TODO: Add ability to search structs for value sizes and value type
+        AttributeTypes = new AttributeType[] { Util.TypeToAttributeType(typeof(T)) };
+        ValueType = Util.TypeToPointerType(typeof(T));
     }
 
-    public VertexBuffer(BufferTargetARB target, params T[] data) : base(target)
+    public VertexBuffer(BufferTargetARB target, params T[] data) : this(target)
     {
         SetData(data);
     }
@@ -53,25 +44,42 @@ public class VertexBuffer<T>: Buffer where T : unmanaged
     {
     }
 
+    public AttributeType[] AttributeTypes { get; private init; }
+    public int TypeSize { get; private init; }
+
+    public int Count { get; private set; }
+
+    public VertexAttribPointerType ValueType { get; private init; }
+
+    public override ObjectIdentifier Identifier => ObjectIdentifier.VertexArray;
+
+    protected override uint Handle => (uint)bufferHandle.Handle;
+
     public void SetData(params T[] data) 
     {
         Bind();
-        GL.BufferData(Target, data, BufferUsageARB.StaticDraw);
-        count = data.Length;
+        GL.BufferData(target, data, BufferUsageARB.StaticDraw); //TODO: Figure out the difference of usage.
+        Count = data.Length;
     }
 
     public void SetData<T2>(params T2[] data) where T2 : unmanaged 
     {
         Bind();
-        GL.BufferData(Target, data, BufferUsageARB.StaticDraw);
+        GL.BufferData(target, data, BufferUsageARB.StaticDraw);
 
         unsafe
         {
-            count = data.Length * sizeof(T2) / sizeof(T);
+            Count = data.Length * sizeof(T2) / sizeof(T);
         }
     }
 
-    public override int Count {get => count;}
+    public override void Bind()
+    {
+        GL.BindBuffer(target, bufferHandle);
+    }
 
-    public override Type Type => typeof(T); //TODO: Maybe change VertexBuffer.type into pointerType or attributeType.
+    public override void Dispose()
+    {
+        GL.DeleteBuffer(bufferHandle);
+    }
 }

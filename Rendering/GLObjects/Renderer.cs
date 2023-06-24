@@ -31,10 +31,9 @@ public sealed class Renderer: IDisposable
     {
         if (vertexArray.ElementBuffer is null) throw new ArgumentException("No element buffer was attached to the vertex array!");
 
-        DrawElementsType elementType = GetElementType(vertexArray.ElementBuffer.Type);
-
         shaderProgram.Bind();
         vertexArray.Bind();
+        DrawElementsType elementType = (DrawElementsType)vertexArray.ElementBuffer.ValueType;
         GL.DrawElements(primitiveType, vertexArray.ElementBuffer.Count, elementType, 0);
     }
 
@@ -49,21 +48,9 @@ public sealed class Renderer: IDisposable
     {
         if(vertexArray.ElementBuffer is null) throw new ArgumentException("No element buffer was attached to the vertex array!");
 
-        DrawElementsType elementType = GetElementType(vertexArray.ElementBuffer.Type);
-
         shaderProgram.Bind();
         vertexArray.Bind();
+        DrawElementsType elementType = (DrawElementsType)vertexArray.ElementBuffer.ValueType;
         GL.DrawElementsInstanced(primitiveType, vertexArray.ElementBuffer.Count, elementType, 0, instanceCount);
-    }
-
-    private static DrawElementsType GetElementType(Type type)
-    {
-        return type.Name switch
-        {
-            nameof(UInt32) => DrawElementsType.UnsignedInt,
-            nameof(UInt16) => DrawElementsType.UnsignedShort,
-            nameof(Byte) => DrawElementsType.UnsignedByte,
-            _ => throw new ArgumentException("The type of the element buffer was not of a possible type!"),
-        };
     }
 }

@@ -79,7 +79,7 @@ public sealed class ShaderProgram: GLObject
 
     public override ObjectIdentifier Identifier => ObjectIdentifier.Program;
 
-    public override uint Handle => (uint) programHandle.Handle;
+    protected override uint Handle => (uint) programHandle.Handle;
 
     public override void Bind()
     {
@@ -153,7 +153,7 @@ public class ProgramUniform
 
     public void SetUniform(object value)
     {
-        if(UniformType != value.UniformTypeOf()) throw new ArgumentException("The given type did not match the type of the uniform.");
+        if(UniformType != (UniformType)Util.TypeToAttributeType(value.GetType())) throw new ArgumentException("The given type did not match the type of the uniform.");
 
         GL.UseProgram(programHandle);
         switch(value)

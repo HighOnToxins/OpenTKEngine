@@ -6,7 +6,7 @@ namespace OpenTKEngine.Rendering.GLObjects;
 public abstract class GLObject : IDisposable
 {
     public abstract ObjectIdentifier Identifier { get; }
-    public abstract uint Handle { get; }
+    protected abstract uint Handle { get; }
 
     public GLObject()
     {

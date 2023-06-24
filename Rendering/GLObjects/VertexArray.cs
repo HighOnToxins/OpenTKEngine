@@ -9,7 +9,7 @@ public sealed class VertexArray: GLObject
 {
     private readonly VertexArrayHandle arrayHandle;
 
-    public Buffer? ElementBuffer { get; private set; } 
+    public IBuffer? ElementBuffer { get; private set; } 
 
     public VertexArray() 
     {
@@ -20,23 +20,20 @@ public sealed class VertexArray: GLObject
 
     public override ObjectIdentifier Identifier => ObjectIdentifier.VertexArray;
 
-    public override uint Handle => (uint) arrayHandle.Handle;
+    protected override uint Handle => (uint) arrayHandle.Handle;
 
-    public void AddBuffer(Buffer buffer, uint divisor, params ProgramAttribute[] attributes)
+    public void AddBuffer(IBuffer buffer, uint divisor, params ProgramAttribute[] attributes)
     {
-        //TODO: Use shader program information, to determine buffer-field sizes, and if the type matches.
-        // Such as having the ArraySize match an arraySize of elements in the buffer.
-        // Such as making sure the correct number of attributes was given.
-
-        VertexAttribPointerType pointerType = Util.TypeToPointerType(buffer.Type);
-        int typeSize = buffer.Type.Size();
-
-        //check if the types match
-        foreach(ProgramAttribute attribute in attributes)
+        if(buffer.AttributeTypes.Length != attributes.Length)
         {
-            if(pointerType != Util.AttributeToPointerType(attribute.AttribType))
+            throw new ArgumentException($"An incorrect number of attributes was given when adding buffer to vertex array, expected {buffer.AttributeTypes.Length} attributes but got {attributes.Length}");
+        }
+
+        for(int i = 0; i < buffer.AttributeTypes.Length; i++)
+        {
+            if(buffer.AttributeTypes[i] != attributes[i].AttribType)
             {
-                throw new ArgumentException("The type of the given buffer did not match the type of the given attribute!");
+                throw new ArgumentException($"Attribute {attributes[i].Name} of type {attributes[i].AttribType} did not match the the buffer which expected {buffer.AttributeTypes[i]}.");
             }
         }
 
@@ -49,10 +46,11 @@ public sealed class VertexArray: GLObject
         Bind();
         buffer.Bind();
 
+        int typeSize = Util.TypeSize(buffer.ValueType);
         int offset = 0;
         for(int i = 0; i < attributes.Length; i++)
         {
-            GL.VertexAttribPointer(attributes[i].Index, attributes[i].ValueCount, pointerType, false, totalSize * typeSize, offset);
+            GL.VertexAttribPointer(attributes[i].Index, attributes[i].ValueCount, buffer.ValueType, false, totalSize * typeSize, offset);
             GL.VertexAttribDivisor(attributes[i].Index, divisor);
             GL.EnableVertexAttribArray(attributes[i].Index);
             offset += attributes[i].ValueCount * typeSize;
@@ -65,7 +63,7 @@ public sealed class VertexArray: GLObject
         }
     }
 
-    public void SetElementBuffer(Buffer elementBuffer)
+    public void SetElementBuffer(IBuffer elementBuffer)
     {
         Bind();
         elementBuffer.Bind();
