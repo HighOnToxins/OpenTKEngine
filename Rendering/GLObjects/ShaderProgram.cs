@@ -82,6 +82,7 @@ public sealed class ShaderProgram: GLObject
 
     public void Draw(VertexArray vertexArray, PrimitiveType primitiveType = PrimitiveType.Triangles)
     {
+        GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
         Bind();
         vertexArray.Bind();
         GL.DrawArrays(primitiveType, 0, vertexArray.MaxVertexCount);
@@ -91,6 +92,7 @@ public sealed class ShaderProgram: GLObject
     {
         if(vertexArray.ElementBuffer is null) throw new ArgumentException("No element buffer was attached to the vertex array!");
 
+        GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
         Bind();
         vertexArray.Bind();
         DrawElementsType elementType = (DrawElementsType)vertexArray.ElementBuffer.ValueType;
@@ -99,6 +101,7 @@ public sealed class ShaderProgram: GLObject
 
     public void DrawInstanced(VertexArray vertexArray, int instanceCount, PrimitiveType primitiveType = PrimitiveType.Triangles)
     {
+        GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
         Bind();
         vertexArray.Bind();
         GL.DrawArraysInstanced(primitiveType, 0, vertexArray.MaxVertexCount, instanceCount);
@@ -108,6 +111,7 @@ public sealed class ShaderProgram: GLObject
     {
         if(vertexArray.ElementBuffer is null) throw new ArgumentException("No element buffer was attached to the vertex array!");
 
+        GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
         Bind();
         vertexArray.Bind();
         DrawElementsType elementType = (DrawElementsType)vertexArray.ElementBuffer.ValueType;
@@ -183,7 +187,7 @@ public class ProgramUniform
 
     public int Index { get;  }
 
-    public void SetUniform(object value)
+    public void SetValue(object value)
     {
         if(UniformType != (UniformType)Util.TypeToAttributeType(value.GetType())) throw new ArgumentException("The given type did not match the type of the uniform.");
 
@@ -202,7 +206,7 @@ public class ProgramUniform
             case Vector4d d4:   GL.Uniform4d(Index, d4); break;
             case Matrix4 m44:   GL.UniformMatrix4f(Index, false, m44); break;
             case Matrix4d d44:  GL.UniformMatrix4d(Index, false, d44); break;
-            default: throw new UnreachableException();
+            default: throw new NotSupportedException("The given object was not supported.");
         }
     }
 }

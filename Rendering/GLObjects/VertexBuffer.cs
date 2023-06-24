@@ -23,7 +23,7 @@ public interface IBuffer
     public void Dispose();
 }
 
-public class VertexBuffer<T>: GLObject, IBuffer where T : unmanaged
+public sealed class VertexBuffer<T>: GLObject, IBuffer where T : unmanaged
 {
     private readonly BufferHandle bufferHandle;
     private readonly BufferTargetARB target;
