@@ -35,6 +35,7 @@ public abstract class Buffer: GLObject
     }
 }
 
+//TODO: Change the buffer to automatically, keep track of data.
 public class VertexBuffer<T>: Buffer where T : unmanaged
 {
     private int count;
@@ -43,9 +44,13 @@ public class VertexBuffer<T>: Buffer where T : unmanaged
     {
     }
 
-    public VertexBuffer(params T[] data) : base()
+    public VertexBuffer(BufferTargetARB target, params T[] data) : base(target)
     {
         SetData(data);
+    }
+
+    public VertexBuffer(params T[] data) : this(BufferTargetARB.ArrayBuffer, data)
+    {
     }
 
     public void SetData(params T[] data) 
@@ -68,5 +73,5 @@ public class VertexBuffer<T>: Buffer where T : unmanaged
 
     public override int Count {get => count;}
 
-    public override Type Type => typeof(T);
+    public override Type Type => typeof(T); //TODO: Maybe change VertexBuffer.type into pointerType or attributeType.
 }

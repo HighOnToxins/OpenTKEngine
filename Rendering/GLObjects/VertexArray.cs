@@ -1,6 +1,7 @@
 ﻿
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
+using OpenTKEngine.Utility;
 
 namespace OpenTKEngine.Rendering.GLObjects;
 
@@ -27,39 +28,13 @@ public sealed class VertexArray: GLObject
         // Such as having the ArraySize match an arraySize of elements in the buffer.
         // Such as making sure the correct number of attributes was given.
 
-        (VertexAttribPointerType pointerType, int typeSize) = buffer.Type.Name switch
-        {
-            nameof(Byte) =>   (VertexAttribPointerType.UnsignedByte,    sizeof(byte)),
-            nameof(SByte) =>  (VertexAttribPointerType.Byte,            sizeof(sbyte)),
-            nameof(Int16) =>  (VertexAttribPointerType.Short,           sizeof(short)),
-            nameof(UInt16) => (VertexAttribPointerType.UnsignedShort,   sizeof(ushort)),
-            nameof(Int32) =>  (VertexAttribPointerType.Int,             sizeof(int)),
-            nameof(UInt32) => (VertexAttribPointerType.UnsignedInt,     sizeof(uint)),
-            nameof(Single) => (VertexAttribPointerType.Float,           sizeof(float)),
-            nameof(Double) => (VertexAttribPointerType.Double,          sizeof(double)),
-            _ => throw new NotImplementedException(),
-        };
+        VertexAttribPointerType pointerType = Util.TypeToPointerType(buffer.Type);
+        int typeSize = buffer.Type.Size();
 
         //check if the types match
         foreach(ProgramAttribute attribute in attributes)
         {
-            VertexAttribPointerType attribPointerType = attribute.Type switch
-            {
-                AttributeType.Int =>        VertexAttribPointerType.Int,
-                AttributeType.Float =>      VertexAttribPointerType.Float,
-                AttributeType.Double =>     VertexAttribPointerType.Double,
-                AttributeType.FloatVec2 =>  VertexAttribPointerType.Float,
-                AttributeType.FloatVec3 =>  VertexAttribPointerType.Float,
-                AttributeType.FloatVec4 =>  VertexAttribPointerType.Float,
-                AttributeType.DoubleVec2 => VertexAttribPointerType.Double,
-                AttributeType.DoubleVec3 => VertexAttribPointerType.Double,
-                AttributeType.DoubleVec4 => VertexAttribPointerType.Double,
-                AttributeType.FloatMat4 =>  VertexAttribPointerType.Float,
-                AttributeType.DoubleMat4 => VertexAttribPointerType.Double,
-                _ => throw new NotSupportedException("The given attribute type was not supported!"),
-            };
-
-            if(pointerType != attribPointerType)
+            if(pointerType != Util.AttributeToPointerType(attribute.AttribType))
             {
                 throw new ArgumentException("The type of the given buffer did not match the type of the given attribute!");
             }
@@ -68,7 +43,7 @@ public sealed class VertexArray: GLObject
         int totalSize = 0;
         for(int i = 0; i < attributes.Length; i++)
         {
-            totalSize += attributes[i].ArraySize;
+            totalSize += attributes[i].ValueCount;
         }
 
         Bind();
@@ -77,10 +52,10 @@ public sealed class VertexArray: GLObject
         int offset = 0;
         for(int i = 0; i < attributes.Length; i++)
         {
-            GL.VertexAttribPointer(attributes[i].Index, attributes[i].ArraySize, pointerType, false, totalSize * typeSize, offset);
+            GL.VertexAttribPointer(attributes[i].Index, attributes[i].ValueCount, pointerType, false, totalSize * typeSize, offset);
             GL.VertexAttribDivisor(attributes[i].Index, divisor);
             GL.EnableVertexAttribArray(attributes[i].Index);
-            offset += attributes[i].ArraySize * typeSize;
+            offset += attributes[i].ValueCount * typeSize;
         }
 
         if(divisor == 0)

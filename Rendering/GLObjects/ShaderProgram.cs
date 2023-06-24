@@ -3,6 +3,7 @@ using OpenTK.Compute.OpenCL;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Mathematics;
+using OpenTKEngine.Utility;
 using System;
 using System.Diagnostics;
 
@@ -101,36 +102,19 @@ public class ProgramAttribute {
         this.programHandle = programHandle;
         Name = name;
         Size = size;
-        Type = type;
+        AttribType = type;
         index = (uint) GL.GetAttribLocation(programHandle, Name);
-
-        ArraySize = type switch
-        {
-            AttributeType.Bool => 1,
-            AttributeType.Int => 1,
-            AttributeType.Float => 1,
-            AttributeType.Double => 1,
-            AttributeType.FloatVec2 => 2,
-            AttributeType.FloatVec3 => 3,
-            AttributeType.FloatVec4 => 4,
-            AttributeType.DoubleVec2 => 2,
-            AttributeType.DoubleVec3 => 3,
-            AttributeType.DoubleVec4 => 4,
-            AttributeType.FloatMat4 => 4*4,
-            AttributeType.DoubleMat4 => 4*4,
-            _ => throw new NotSupportedException("The given attribute type was not supported!"),
-        };
+        ValueCount = Util.ValueCount(AttribType);
     }
 
     public string Name { get; private set; }
 
     public int Size { get; private init; }
 
-    public AttributeType Type { get; private init; }
-
+    public AttributeType AttribType { get; private init; }
 
     private uint index;
-    public int ArraySize { get; private set; }
+    public int ValueCount { get; private set; }
 
     public uint Index
     {
@@ -156,40 +140,22 @@ public class ProgramUniform
         this.programHandle = programHandle;
         Name = name;
         Size = size;
-        Type = type;
+        UniformType = type;
         Index = GL.GetUniformLocation(programHandle, Name);
     }
     
     public string Name;
     public int Size { get; private init; }
 
-    public UniformType Type { get; private init; }
+    public UniformType UniformType { get; private init; }
 
     public int Index { get;  }
 
     public void SetUniform(object value)
     {
+        if(UniformType != value.UniformTypeOf()) throw new ArgumentException("The given type did not match the type of the uniform.");
+
         GL.UseProgram(programHandle);
-
-        UniformType objectType = value switch
-        {
-            int =>      UniformType.Int,
-            float =>    UniformType.Float,
-            double =>   UniformType.Double,
-            int[] =>    UniformType.IntSampler1dArray,
-            Vector2 =>  UniformType.FloatVec2,
-            Vector3 =>  UniformType.FloatVec3,
-            Vector4 =>  UniformType.FloatVec4,
-            Vector2d => UniformType.DoubleVec2,
-            Vector3d => UniformType.DoubleVec3,
-            Vector4d => UniformType.DoubleVec4,
-            Matrix4 =>  UniformType.FloatMat4,
-            Matrix4d => UniformType.DoubleMat4,
-            _ => throw new NotSupportedException("The give type was not supported as a uniform."),
-        };
-
-        if(Type != objectType) throw new ArgumentException("The given type did not match the type of the uniform.");
-
         switch(value)
         {
             case int i:         GL.Uniform1i(Index, i); break;
