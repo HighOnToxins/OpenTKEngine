@@ -80,6 +80,40 @@ public sealed class ShaderProgram: GLObject
 
     protected override uint Handle => (uint) programHandle.Handle;
 
+    public void Draw(VertexArray vertexArray, PrimitiveType primitiveType = PrimitiveType.Triangles)
+    {
+        Bind();
+        vertexArray.Bind();
+        GL.DrawArrays(primitiveType, 0, vertexArray.MaxVertexCount);
+    }
+
+    public void DrawElements(VertexArray vertexArray, PrimitiveType primitiveType = PrimitiveType.Triangles)
+    {
+        if(vertexArray.ElementBuffer is null) throw new ArgumentException("No element buffer was attached to the vertex array!");
+
+        Bind();
+        vertexArray.Bind();
+        DrawElementsType elementType = (DrawElementsType)vertexArray.ElementBuffer.ValueType;
+        GL.DrawElements(primitiveType, vertexArray.ElementBuffer.ValueCount, elementType, 0);
+    }
+
+    public void DrawInstanced(VertexArray vertexArray, int instanceCount, PrimitiveType primitiveType = PrimitiveType.Triangles)
+    {
+        Bind();
+        vertexArray.Bind();
+        GL.DrawArraysInstanced(primitiveType, 0, vertexArray.MaxVertexCount, instanceCount);
+    }
+
+    public void DrawElementsInstanced(VertexArray vertexArray, int instanceCount, PrimitiveType primitiveType = PrimitiveType.Triangles)
+    {
+        if(vertexArray.ElementBuffer is null) throw new ArgumentException("No element buffer was attached to the vertex array!");
+
+        Bind();
+        vertexArray.Bind();
+        DrawElementsType elementType = (DrawElementsType)vertexArray.ElementBuffer.ValueType;
+        GL.DrawElementsInstanced(primitiveType, vertexArray.ElementBuffer.ValueCount, elementType, 0, instanceCount);
+    }
+
     public override void Bind()
     {
         GL.UseProgram(programHandle);
@@ -89,7 +123,6 @@ public sealed class ShaderProgram: GLObject
     {
         GL.DeleteProgram(programHandle);
     }
-
 }
 
 public class ProgramAttribute {
