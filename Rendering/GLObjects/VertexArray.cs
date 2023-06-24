@@ -37,12 +37,6 @@ public sealed class VertexArray: GLObject
             }
         }
 
-        int totalSize = 0;
-        for(int i = 0; i < attributes.Length; i++)
-        {
-            totalSize += attributes[i].ValueCount;
-        }
-
         Bind();
         buffer.Bind();
 
@@ -50,7 +44,7 @@ public sealed class VertexArray: GLObject
         int offset = 0;
         for(int i = 0; i < attributes.Length; i++)
         {
-            GL.VertexAttribPointer(attributes[i].Index, attributes[i].ValueCount, buffer.ValueType, false, totalSize * typeSize, offset);
+            GL.VertexAttribPointer(attributes[i].Index, attributes[i].ValueCount, buffer.ValueType, false, buffer.ElementValueCount * typeSize, offset);
             GL.VertexAttribDivisor(attributes[i].Index, divisor);
             GL.EnableVertexAttribArray(attributes[i].Index);
             offset += attributes[i].ValueCount * typeSize;
@@ -58,7 +52,7 @@ public sealed class VertexArray: GLObject
 
         if(divisor == 0)
         {
-            int vertexCount = buffer.Count / totalSize;
+            int vertexCount = buffer.ValueCount / buffer.ElementValueCount;
             if(vertexCount > MaxVertexCount) MaxVertexCount = vertexCount;
         }
     }

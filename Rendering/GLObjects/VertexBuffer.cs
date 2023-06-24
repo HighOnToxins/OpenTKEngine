@@ -2,19 +2,22 @@
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
 using OpenTKEngine.Utility;
-using System.Runtime.InteropServices;
+using System.Reflection;
+using System.Runtime.CompilerServices;
 
 namespace OpenTKEngine.Rendering.GLObjects;
 
 /// <summary> An array over a number of values, with a structure. </summary>
-public interface IBuffer 
+public interface IBuffer
 {
-    public int Count { get; }
+    public int ValueCount { get; }
+
+    public int ElementValueCount { get; }
 
     public AttributeType[] AttributeTypes { get; }
 
     public VertexAttribPointerType ValueType { get; } //TODO: Consider using type class instead such that it is easier to get size, by Marshal.Sizeof().
-   
+
     public void Bind();
 
     public void Dispose();
@@ -30,9 +33,51 @@ public class VertexBuffer<T>: GLObject, IBuffer where T : unmanaged
         this.target = target;
         bufferHandle = GL.GenBuffer();
 
-        //TODO: Add ability to search structs for value sizes and value type
-        AttributeTypes = new AttributeType[] { Util.TypeToAttributeType(typeof(T)) };
-        ValueType = Util.TypeToPointerType(typeof(T));
+        try
+        {
+            AttributeTypes = new AttributeType[] { Util.TypeToAttributeType(typeof(T)) };
+            ValueType = Util.TypeToPointerType(typeof(T));
+            ElementValueCount = Util.ValueCount(AttributeTypes[0]);
+        }
+        catch
+        {
+            //if type is not a struct
+            if(!typeof(T).IsValueType || typeof(T).IsEnum) throw;
+
+            ReadTypesFromStruct(out AttributeType[] attributeTypes, out VertexAttribPointerType valueType, out int elementSize);
+            AttributeTypes = attributeTypes;
+            ValueType = valueType;
+            ElementValueCount = elementSize;
+        }
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static void ReadTypesFromStruct(out AttributeType[] attributeTypes, out VertexAttribPointerType valueType, out int elementSize)
+    {
+        Type[] fieldTypes = typeof(T)
+            .GetFields(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance)
+            .Select(f => f.FieldType)
+            .ToArray();
+
+        if(fieldTypes.Length == 0)
+        {
+            throw new ArgumentException("The struct given as a generic type did not contain any data.");
+        }
+
+        elementSize = 0;
+        attributeTypes = new AttributeType[fieldTypes.Length];
+        valueType = Util.TypeToPointerType(fieldTypes[0]);
+        for(int i = 0; i < fieldTypes.Length; i++)
+        {
+            attributeTypes[i] = Util.TypeToAttributeType(fieldTypes[i]);
+            VertexAttribPointerType pointerType = Util.TypeToPointerType(fieldTypes[i]);
+            elementSize += Util.ValueCount(attributeTypes[i]);
+
+            if(valueType != pointerType)
+            {
+                throw new ArgumentException($"The value type {pointerType} deviated from {valueType}. All value types of a given struct must be the same.");
+            }
+        }
     }
 
     public VertexBuffer(BufferTargetARB target, params T[] data) : this(target)
@@ -44,10 +89,11 @@ public class VertexBuffer<T>: GLObject, IBuffer where T : unmanaged
     {
     }
 
-    public AttributeType[] AttributeTypes { get; private init; }
-    public int TypeSize { get; private init; }
+    public int ValueCount { get; private set; }
 
-    public int Count { get; private set; }
+    public int ElementValueCount { get; private init; }
+
+    public AttributeType[] AttributeTypes { get; private init; }
 
     public VertexAttribPointerType ValueType { get; private init; }
 
@@ -59,18 +105,7 @@ public class VertexBuffer<T>: GLObject, IBuffer where T : unmanaged
     {
         Bind();
         GL.BufferData(target, data, BufferUsageARB.StaticDraw); //TODO: Figure out the difference of usage.
-        Count = data.Length;
-    }
-
-    public void SetData<T2>(params T2[] data) where T2 : unmanaged 
-    {
-        Bind();
-        GL.BufferData(target, data, BufferUsageARB.StaticDraw);
-
-        unsafe
-        {
-            Count = data.Length * sizeof(T2) / sizeof(T);
-        }
+        ValueCount = data.Length * ElementValueCount;
     }
 
     public override void Bind()

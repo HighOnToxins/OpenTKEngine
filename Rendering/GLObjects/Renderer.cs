@@ -34,7 +34,7 @@ public sealed class Renderer: IDisposable
         shaderProgram.Bind();
         vertexArray.Bind();
         DrawElementsType elementType = (DrawElementsType)vertexArray.ElementBuffer.ValueType;
-        GL.DrawElements(primitiveType, vertexArray.ElementBuffer.Count, elementType, 0);
+        GL.DrawElements(primitiveType, vertexArray.ElementBuffer.ValueCount, elementType, 0);
     }
 
     public void DrawInstanced(int instanceCount, PrimitiveType primitiveType = PrimitiveType.Triangles)
@@ -51,6 +51,6 @@ public sealed class Renderer: IDisposable
         shaderProgram.Bind();
         vertexArray.Bind();
         DrawElementsType elementType = (DrawElementsType)vertexArray.ElementBuffer.ValueType;
-        GL.DrawElementsInstanced(primitiveType, vertexArray.ElementBuffer.Count, elementType, 0, instanceCount);
+        GL.DrawElementsInstanced(primitiveType, vertexArray.ElementBuffer.ValueCount, elementType, 0, instanceCount);
     }
 }

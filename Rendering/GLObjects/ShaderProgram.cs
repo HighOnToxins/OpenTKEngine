@@ -1,5 +1,4 @@
 ﻿
-using OpenTK.Compute.OpenCL;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Mathematics;
@@ -170,6 +169,7 @@ public class ProgramUniform
             case Vector4d d4:   GL.Uniform4d(Index, d4); break;
             case Matrix4 m44:   GL.UniformMatrix4f(Index, false, m44); break;
             case Matrix4d d44:  GL.UniformMatrix4d(Index, false, d44); break;
+            default: throw new UnreachableException();
         }
     }
 }
