@@ -4,6 +4,7 @@ using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Mathematics;
 using OpenTKEngine.Utility;
+using System.Collections;
 using System.Xml.Linq;
 
 namespace OpenTKEngine.Rendering.GLObjects;
@@ -147,10 +148,10 @@ public class ProgramAttribute {
     {
         Program = program;
         Name = name;
-        Size = size;  //TODO: Use the size, for value count. Since, size is array size.
+        Size = size; 
         AttribType = type;
         this.index = index;
-        ValueCount = Util.ValueCount(AttribType);
+        ValueCount = Util.ValueCount(AttribType) * size;
     }
 
     public string Name { get; private set; }
@@ -199,35 +200,42 @@ public class ProgramUniform
 
     public void SetValue(object value)
     {
-        //TODO: Add type checking to texture units.
-        Program.Bind();
-        if(value is TextureUnit textureUnit) {
-            GL.Uniform1i(Location, (int)(textureUnit - TextureUnit.Texture0));
-            return;
-        }
-        else if(value is TextureUnit[] unitArray)
-        {
-            int[] intArray = unitArray.Select(u => (int)(u - TextureUnit.Texture0)).ToArray();
-            GL.Uniform1i(Location, intArray.Length, intArray);
-            return;
-        }
-        
         if(UniformType != (UniformType)Util.TypeToAttributeType(value.GetType())) throw new ArgumentException("The given type did not match the type of the uniform.");
 
+        if(value is Array array && array.Length > Size)
+        {
+            throw new ArgumentException($"The size of the given array was {array.Length}, but the uniform has a maximum size of {Size}");
+        }
+
+        Program.Bind();
         switch(value)
         {
-            case int i:         GL.Uniform1i(Location, i); break;
-            case float f:       GL.Uniform1f(Location, f); break;
-            case double d:      GL.Uniform1d(Location, d); break;
-            case int[] ii:      GL.Uniform1i(Location, ii.Length, ii); break;
-            case Vector2 v2:    GL.Uniform2f(Location, v2); break;
-            case Vector3 v3:    GL.Uniform3f(Location, v3); break;
-            case Vector4 v4:    GL.Uniform4f(Location, v4); break;
-            case Vector2d d2:   GL.Uniform2d(Location, d2); break;
-            case Vector3d d3:   GL.Uniform3d(Location, d3); break;
-            case Vector4d d4:   GL.Uniform4d(Location, d4); break;
-            case Matrix4 m44:   GL.UniformMatrix4f(Location, false, m44); break;
-            case Matrix4d d44:  GL.UniformMatrix4d(Location, false, d44); break;
+            case TextureUnit u: GL.Uniform1i(Location, (int)(u - TextureUnit.Texture0)); break;
+            case int i: GL.Uniform1i(Location, i); break;
+            case float f: GL.Uniform1f(Location, f); break;
+            case double d: GL.Uniform1d(Location, d); break;
+            case Vector2 v2: GL.Uniform2f(Location, v2); break;
+            case Vector3 v3: GL.Uniform3f(Location, v3); break;
+            case Vector4 v4: GL.Uniform4f(Location, v4); break;
+            case Vector2d d2: GL.Uniform2d(Location, d2); break;
+            case Vector3d d3: GL.Uniform3d(Location, d3); break;
+            case Vector4d d4: GL.Uniform4d(Location, d4); break;
+            case Matrix4 m44: GL.UniformMatrix4f(Location, false, m44); break;
+            case Matrix4d d44: GL.UniformMatrix4d(Location, false, d44); break;
+
+            case TextureUnit[] u: GL.Uniform1i(Location, u.Length, u.Select(i => (int)(i - TextureUnit.Texture0)).ToArray()); break;
+            case int[] i: GL.Uniform1i(Location, i.Length, i); break;
+            case float[] f: GL.Uniform1f(Location, f.Length, f); break;
+            case double[] d: GL.Uniform1d(Location, d.Length, d); break;
+            case Vector2[] v2: GL.Uniform2f(Location, v2.Length, v2); break;
+            case Vector3[] v3: GL.Uniform3f(Location, v3.Length, v3); break;
+            case Vector4[] v4: GL.Uniform4f(Location, v4.Length, v4); break;
+            case Vector2d[] d2: GL.Uniform2d(Location, d2.Length, d2); break;
+            case Vector3d[] d3: GL.Uniform3d(Location, d3.Length, d3); break;
+            case Vector4d[] d4: GL.Uniform4d(Location, d4.Length, d4); break;
+            case Matrix4[] m44: GL.UniformMatrix4f(Location, m44.Length, false, m44); break;
+            case Matrix4d[] d44: GL.UniformMatrix4d(Location, d44.Length, false, d44); break;
+
             default: throw new NotSupportedException("The given object was not supported.");
         }
     }

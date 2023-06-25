@@ -33,7 +33,10 @@ public static class Util
         nameof(Vector4d) => AttributeType.DoubleVec4, 
         nameof(Matrix4) => AttributeType.FloatMat4, 
         nameof(Matrix4d) => AttributeType.DoubleMat4, 
-        _ => throw new NotSupportedException("The given attribute type was not supported!"),
+        nameof(TextureUnit) => AttributeType.Sampler2d,
+        _ => type.IsAssignableTo(typeof(Array)) && type.GetElementType() is Type elementType 
+            ? TypeToAttributeType(elementType) 
+            : throw new NotSupportedException("The given attribute type was not supported!"),
     };
 
     public static VertexAttribPointerType TypeToPointerType(Type type) 
@@ -55,7 +58,9 @@ public static class Util
         nameof(Vector4d) => VertexAttribPointerType.Double,
         nameof(Matrix4) => VertexAttribPointerType.Float,
         nameof(Matrix4d) => VertexAttribPointerType.Double,
-        _ => throw new NotImplementedException(),
+        _ => type.IsAssignableTo(typeof(Array)) && type.GetElementType() is Type elementType
+            ? TypeToPointerType(elementType)
+            : throw new NotImplementedException(),
     };
 
     public static int ValueCount(AttributeType type) => type switch

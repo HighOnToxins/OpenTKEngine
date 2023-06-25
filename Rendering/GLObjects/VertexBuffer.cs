@@ -18,7 +18,7 @@ public interface IBuffer
 
     public AttributeType[] AttributeTypes { get; }
 
-    public VertexAttribPointerType ValueType { get; } //TODO: Consider using type class instead such that it is easier to get size, by Marshal.Sizeof().
+    public VertexAttribPointerType ValueType { get; }
 
     public void Bind();
 
@@ -108,7 +108,7 @@ public sealed class VertexBuffer<T>: GLObject, IBuffer where T : unmanaged
     public void SetData(params T[] data) 
     {
         Bind();
-        GL.BufferData(target, data, BufferUsageARB.StaticDraw); //TODO: Figure out the difference of usage.
+        GL.BufferData(target, data, BufferUsageARB.StaticDraw); //TODO: Figure out the usage of usage.
         VertexCount = data.Length;
     }
 
