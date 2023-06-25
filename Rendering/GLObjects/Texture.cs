@@ -2,6 +2,7 @@
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
 using StbImageSharp;
+using System.IO;
 
 namespace OpenTKEngine.Rendering.GLObjects;
 
@@ -37,6 +38,13 @@ public sealed class Texture: GLObject
         return new Texture(image.Width, image.Height, image.Data);
     }
 
+    public static Texture LoadFromMemory(byte[] bytes)
+    {
+        StbImage.stbi_set_flip_vertically_on_load(1);
+        ImageResult image = ImageResult.FromMemory(bytes, ColorComponents.RedGreenBlueAlpha);
+
+        return new Texture(image.Width, image.Height, image.Data);
+    }
 
     public override ObjectIdentifier Identifier => ObjectIdentifier.Texture;
 

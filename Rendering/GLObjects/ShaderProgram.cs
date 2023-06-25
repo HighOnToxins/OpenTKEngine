@@ -5,6 +5,7 @@ using OpenTK.Graphics.OpenGL;
 using OpenTK.Mathematics;
 using OpenTKEngine.Utility;
 using System.Collections;
+using System.Text;
 using System.Xml.Linq;
 
 namespace OpenTKEngine.Rendering.GLObjects;
@@ -73,6 +74,11 @@ public sealed class ShaderProgram: GLObject
     public static ShaderProgram LoadFromFiles(string vertexShaderPath, string fragmentShaderPath)
     {
         return new ShaderProgram(File.ReadAllText(vertexShaderPath), File.ReadAllText(fragmentShaderPath));
+    }
+
+    public static ShaderProgram LoadFromMemory(byte[] vertexString, byte[] fragmentString)
+    {
+        return new ShaderProgram(Encoding.Default.GetString(vertexString), Encoding.Default.GetString(fragmentString));
     }
 
     private readonly Dictionary<string, ProgramAttribute> attributes;
