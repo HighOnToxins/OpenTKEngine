@@ -95,7 +95,7 @@ public sealed class ShaderProgram: GLObject
         GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
         Bind();
         vertexArray.Bind();
-        GL.DrawArrays(primitiveType, 0, vertexArray.MaxVertexCount);
+        GL.DrawArrays(primitiveType, 0, vertexArray.MaxVertexCount());
     }
 
     public void DrawElements(VertexArray vertexArray, PrimitiveType primitiveType = PrimitiveType.Triangles)
@@ -114,7 +114,7 @@ public sealed class ShaderProgram: GLObject
         GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
         Bind();
         vertexArray.Bind();
-        GL.DrawArraysInstanced(primitiveType, 0, vertexArray.MaxVertexCount, instanceCount);
+        GL.DrawArraysInstanced(primitiveType, 0, vertexArray.MaxVertexCount(), instanceCount);
     }
 
     public void DrawElementsInstanced(VertexArray vertexArray, int instanceCount, PrimitiveType primitiveType = PrimitiveType.Triangles)

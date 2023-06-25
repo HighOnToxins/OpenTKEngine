@@ -9,20 +9,52 @@ public sealed class VertexArray: GLObject
 {
     private readonly VertexArrayHandle arrayHandle;
 
+    private readonly Dictionary<uint, IBuffer> attachedBuffers;
+
     public IBuffer? ElementBuffer { get; private set; } 
 
     public VertexArray() 
     {
         arrayHandle = GL.GenVertexArray();
+        attachedBuffers = new();
     }    
 
-    public int MaxVertexCount { get; private set; }
+    public int MaxVertexCount()
+    {
+        int maxVertexCount = 0;
+        foreach(IBuffer buffer in attachedBuffers.Values)
+        {
+            if(buffer.VertexCount > maxVertexCount)
+            {
+                maxVertexCount = buffer.VertexCount;
+            }
+        }
+        return maxVertexCount;
+    }
+
+    public int MinVertexCount()
+    {
+        if(attachedBuffers.Values.Count == 0)
+        {
+            return 0;
+        }
+
+        int maxVertexCount = int.MaxValue;
+        foreach(IBuffer buffer in attachedBuffers.Values)
+        {
+            if(buffer.VertexCount < maxVertexCount)
+            {
+                maxVertexCount = buffer.VertexCount;
+            }
+        }
+        return maxVertexCount;
+    }
 
     public override ObjectIdentifier Identifier => ObjectIdentifier.VertexArray;
 
     protected override uint Handle => (uint) arrayHandle.Handle;
 
-    public void AddBuffer(IBuffer buffer, uint divisor, params ProgramAttribute[] attributes)
+    public void SetBuffer(IBuffer buffer, uint divisor, params ProgramAttribute[] attributes)
     {
         if(buffer.AttributeTypes.Length != attributes.Length)
         {
@@ -56,12 +88,8 @@ public sealed class VertexArray: GLObject
             GL.VertexAttribDivisor(attributes[i].Index, divisor);
             GL.EnableVertexAttribArray(attributes[i].Index);
             offset += attributes[i].ValueCount * typeSize;
-        }
 
-        //TODO: Update MaxVertexCount dynamically as buffers are updated.
-        if(divisor == 0 && buffer.VertexCount > MaxVertexCount)
-        {
-            MaxVertexCount = buffer.VertexCount;
+            if(divisor == 0) attachedBuffers.Add(attributes[i].Index, buffer);
         }
     }
 
