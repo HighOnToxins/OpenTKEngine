@@ -5,18 +5,18 @@ namespace OpenTKEngine.Scenes;
 
 public interface IScene
 {
-    void Update();
+    void Update() { }
 
-    void KeyDown(KeyboardKeyEventArgs args);
-    void KeyUp(KeyboardKeyEventArgs args);
+    void KeyDown(KeyboardKeyEventArgs args) { }
+    void KeyUp(KeyboardKeyEventArgs args) { }
 
-    void MouseDown(MouseButtonEventArgs args);
-    void MouseUp(MouseButtonEventArgs args);
-    void MouseMove(MouseMoveEventArgs args);
-    void MouseWheel(MouseWheelEventArgs args);
+    void MouseDown(MouseButtonEventArgs args) { }
+    void MouseUp(MouseButtonEventArgs args) { }
+    void MouseMove(MouseMoveEventArgs args) { }
+    void MouseWheel(MouseWheelEventArgs args) { }
 
-    void MouseEnter();
-    void MouseLeave();
+    void MouseEnter() { }
+    void MouseLeave() { }
 
-    void Closing(CancelEventArgs args);
+    void Closing(CancelEventArgs args) { }
 }
