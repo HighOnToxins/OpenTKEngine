@@ -111,6 +111,11 @@ public sealed class VertexArray: GLObject
 
     public void SetElementBuffer(IBuffer elementBuffer)
     {
+        if(!elementBuffer.IsElementBuffer)
+        {
+            throw new ArgumentException("The given buffer was not an element buffer!");
+        }
+
         Bind();
         elementBuffer.Bind();
         ElementBuffer = elementBuffer;

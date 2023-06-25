@@ -19,6 +19,7 @@ public interface IBuffer
     public AttributeType[] AttributeTypes { get; }
 
     public VertexAttribPointerType ValueType { get; }
+    public bool IsElementBuffer { get; }
 
     public void Bind();
 
@@ -46,15 +47,15 @@ public sealed class VertexBuffer<T>: GLObject, IBuffer where T : unmanaged
             //if type is not a struct
             if(!typeof(T).IsValueType || typeof(T).IsEnum) throw;
 
-            ReadTypesFromStruct(out AttributeType[] attributeTypes, out VertexAttribPointerType valueType, out int elementSize);
+            ReadTypesFromStruct(out AttributeType[] attributeTypes, out VertexAttribPointerType valueType, out int vertexValueCount);
             AttributeTypes = attributeTypes;
             ValueType = valueType;
-            VertexValueCount = elementSize;
+            VertexValueCount = vertexValueCount;
         }
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static void ReadTypesFromStruct(out AttributeType[] attributeTypes, out VertexAttribPointerType valueType, out int elementSize)
+    private static void ReadTypesFromStruct(out AttributeType[] attributeTypes, out VertexAttribPointerType valueType, out int vertexValueCount)
     {
         Type[] fieldTypes = typeof(T)
             .GetFields(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance)
@@ -66,14 +67,14 @@ public sealed class VertexBuffer<T>: GLObject, IBuffer where T : unmanaged
             throw new ArgumentException("The struct given as a generic type did not contain any data.");
         }
 
-        elementSize = 0;
+        vertexValueCount = 0;
         attributeTypes = new AttributeType[fieldTypes.Length];
         valueType = Util.TypeToPointerType(fieldTypes[0]);
         for(int i = 0; i < fieldTypes.Length; i++)
         {
             attributeTypes[i] = Util.TypeToAttributeType(fieldTypes[i]);
             VertexAttribPointerType pointerType = Util.TypeToPointerType(fieldTypes[i]);
-            elementSize += Util.ValueCount(attributeTypes[i]);
+            vertexValueCount += Util.ValueCount(attributeTypes[i]);
 
             if(valueType != pointerType)
             {
@@ -100,6 +101,8 @@ public sealed class VertexBuffer<T>: GLObject, IBuffer where T : unmanaged
     public AttributeType[] AttributeTypes { get; private init; }
 
     public VertexAttribPointerType ValueType { get; private init; }
+
+    public bool IsElementBuffer { get => target == BufferTargetARB.ElementArrayBuffer; }
 
     public override ObjectIdentifier Identifier => ObjectIdentifier.Buffer;
 
