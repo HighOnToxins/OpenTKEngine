@@ -10,6 +10,8 @@ using System.Diagnostics;
 
 namespace OpenTKEngine;
 
+// TODO: Add Graphics, SceneManager, Button, Entity, InputManager, PhysicsObject.
+
 public sealed class TKEngineWindow
 {
 
