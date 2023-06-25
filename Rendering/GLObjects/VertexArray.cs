@@ -93,8 +93,11 @@ public sealed class VertexArray: GLObject
             {
                 GL.VertexAttribIPointer(attributes[i].Index, attributes[i].ValueCount, (VertexAttribIType)buffer.ValueType, buffer.VertexValueCount * typeSize, offset);
             }
-            else
+            else if(buffer.ValueType == VertexAttribPointerType.Double)
             {
+                GL.VertexAttribLPointer(attributes[i].Index, attributes[i].ValueCount, (VertexAttribLType)buffer.ValueType, buffer.VertexValueCount * typeSize, offset);
+            }
+            else{
                 GL.VertexAttribPointer(attributes[i].Index, attributes[i].ValueCount, buffer.ValueType, false, buffer.VertexValueCount * typeSize, offset);
             }
 
