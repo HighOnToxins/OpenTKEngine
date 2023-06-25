@@ -93,7 +93,6 @@ public sealed class ShaderProgram: GLObject
 
     public void Draw(VertexArray vertexArray, PrimitiveType primitiveType = PrimitiveType.Triangles)
     {
-        GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
         Bind();
         vertexArray.Bind();
         GL.DrawArrays(primitiveType, 0, vertexArray.MaxVertexCount());
@@ -103,7 +102,6 @@ public sealed class ShaderProgram: GLObject
     {
         if(vertexArray.ElementBuffer is null) throw new ArgumentException("No element buffer was attached to the vertex array!");
 
-        GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
         Bind();
         vertexArray.Bind();
         DrawElementsType elementType = (DrawElementsType)vertexArray.ElementBuffer.ValueType;
@@ -112,7 +110,6 @@ public sealed class ShaderProgram: GLObject
 
     public void DrawInstanced(VertexArray vertexArray, int instanceCount, PrimitiveType primitiveType = PrimitiveType.Triangles)
     {
-        GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
         Bind();
         vertexArray.Bind();
         GL.DrawArraysInstanced(primitiveType, 0, vertexArray.MaxVertexCount(), instanceCount);
@@ -122,7 +119,6 @@ public sealed class ShaderProgram: GLObject
     {
         if(vertexArray.ElementBuffer is null) throw new ArgumentException("No element buffer was attached to the vertex array!");
 
-        GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
         Bind();
         vertexArray.Bind();
         DrawElementsType elementType = (DrawElementsType)vertexArray.ElementBuffer.ValueType;

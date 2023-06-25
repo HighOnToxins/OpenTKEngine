@@ -50,6 +50,8 @@ public sealed class EngineWindow
 
     public void Run()
     {
+        GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+
         IScene scene = sceneInit.Invoke(this);
 
         window.KeyUp += scene.KeyUp;
