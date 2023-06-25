@@ -1,8 +1,10 @@
 ﻿
+using OpenTK.Compute.OpenCL;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Mathematics;
 using OpenTKEngine.Utility;
+using System.Xml.Linq;
 
 namespace OpenTKEngine.Rendering.GLObjects;
 
@@ -46,7 +48,8 @@ public sealed class ShaderProgram: GLObject
             int size = 0;
             AttributeType type = 0;
             GL.GetActiveAttrib(programHandle, i, maxAttributeLength, ref length, ref size, ref type, out string name);
-            attributes.Add(name,new ProgramAttribute(programHandle, name, size, type));
+            uint index = (uint) GL.GetAttribLocation(programHandle, name);
+            attributes.Add(name,new ProgramAttribute(this, name, size, type, index));
         }
 
         int uniformCount = 0;
@@ -60,23 +63,32 @@ public sealed class ShaderProgram: GLObject
             int size = 0;
             UniformType type = 0;
             GL.GetActiveUniform(programHandle, i, maxUniformLength, ref length, ref size, ref type, out string name);
-            uniforms.Add(name, new ProgramUniform(programHandle, name, size, type));
+            int location = GL.GetUniformLocation(programHandle, name);
+            uniforms.Add(name, new ProgramUniform(this, name, size, type, location));
         }
 
     }
 
     private readonly Dictionary<string, ProgramAttribute> attributes;
+
     private readonly Dictionary<string, ProgramUniform> uniforms;
 
     public IReadOnlyList<ProgramAttribute> Attributes { get => attributes.Values.ToList(); }
+
     public IReadOnlyList<ProgramUniform> Uniforms { get => uniforms.Values.ToList(); }
 
     public ProgramAttribute GetAttribute(string name) => attributes[name];
+
     public ProgramUniform GetUniform(string name) => uniforms[name];
 
     public override ObjectIdentifier Identifier => ObjectIdentifier.Program;
 
     protected override uint Handle => (uint) programHandle.Handle;
+
+    internal void BindAttributeLocation(string name, uint index)
+    {
+        GL.BindAttribLocation(programHandle, index, name);
+    }
 
     public void Draw(VertexArray vertexArray, PrimitiveType primitiveType = PrimitiveType.Triangles)
     {
@@ -129,15 +141,15 @@ public sealed class ShaderProgram: GLObject
 
 public class ProgramAttribute {
 
-    private readonly ProgramHandle programHandle;
+    public ShaderProgram Program;
 
-    internal ProgramAttribute(ProgramHandle programHandle, string name, int size, AttributeType type)
+    internal ProgramAttribute(ShaderProgram program, string name, int size, AttributeType type, uint index)
     {
-        this.programHandle = programHandle;
+        Program = program;
         Name = name;
         Size = size;  //TODO: Use the size, for value count. Since, size is array size.
         AttribType = type;
-        index = (uint) GL.GetAttribLocation(programHandle, Name);
+        this.index = index;
         ValueCount = Util.ValueCount(AttribType);
     }
 
@@ -158,7 +170,7 @@ public class ProgramAttribute {
         }
         set
         {
-            GL.BindAttribLocation(programHandle, value, Name);
+            Program.BindAttributeLocation(Name, value);
             index = value;
         }
     }
@@ -167,15 +179,15 @@ public class ProgramAttribute {
 
 public class ProgramUniform
 {
-    private readonly ProgramHandle programHandle;
+    public ShaderProgram Program;
 
-    public ProgramUniform(ProgramHandle programHandle, string name, int size, UniformType type)
+    public ProgramUniform(ShaderProgram program, string name, int size, UniformType type, int location)
     {
-        this.programHandle = programHandle;
+        Program = program;
         Name = name;
         Size = size; //Use the size, for value count.
         UniformType = type;
-        Location = GL.GetUniformLocation(programHandle, Name);
+        Location = location;
     }
     
     public string Name;
@@ -188,15 +200,15 @@ public class ProgramUniform
     public void SetValue(object value)
     {
         //TODO: Add type checking to texture units.
-        GL.UseProgram(programHandle);
+        Program.Bind();
         if(value is TextureUnit textureUnit) {
             GL.Uniform1i(Location, (int)(textureUnit - TextureUnit.Texture0));
             return;
         }
         else if(value is TextureUnit[] unitArray)
         {
-            int[] intArr = unitArray.Select(u => (int)(u - TextureUnit.Texture0)).ToArray();
-            GL.Uniform1i(Location, intArr.Length, intArr);
+            int[] intArray = unitArray.Select(u => (int)(u - TextureUnit.Texture0)).ToArray();
+            GL.Uniform1i(Location, intArray.Length, intArray);
             return;
         }
         
