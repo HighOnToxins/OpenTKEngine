@@ -9,19 +9,11 @@ public sealed class Texture: GLObject
 {
     private readonly TextureHandle textureHandle;
 
-    public Texture(string path)
+    public Texture(int width, int height, byte[] data)
     {
-        StbImage.stbi_set_flip_vertically_on_load(1);
-        ImageResult image;
-
-        using(Stream stream = File.OpenRead(path))
-        {
-            image = ImageResult.FromStream(stream, ColorComponents.RedGreenBlueAlpha);
-        }
-
         textureHandle = GL.GenTexture();
         SetUnit(TextureUnit.Texture0);
-        GL.TexImage2D(TextureTarget.Texture2d, 0, InternalFormat.Rgba, image.Width, image.Height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, image.Data);
+        GL.TexImage2D(TextureTarget.Texture2d, 0, InternalFormat.Rgba, width, height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, data);
 
         //TODO: Add the ability to change all these settings.
         GL.TexParameteri(TextureTarget.Texture2d, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
@@ -31,6 +23,20 @@ public sealed class Texture: GLObject
 
         GL.GenerateMipmap(TextureTarget.Texture2d);
     }
+
+    public static Texture LoadFromFile(string path)
+    {
+        StbImage.stbi_set_flip_vertically_on_load(1);
+        ImageResult image;
+
+        using(Stream stream = File.OpenRead(path))
+        {
+            image = ImageResult.FromStream(stream, ColorComponents.RedGreenBlueAlpha);
+        }
+
+        return new Texture(image.Width, image.Height, image.Data);
+    }
+
 
     public override ObjectIdentifier Identifier => ObjectIdentifier.Texture;
 

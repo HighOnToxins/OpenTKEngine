@@ -10,15 +10,15 @@ using System.Diagnostics;
 
 namespace OpenTKEngine;
 
-public sealed class EngineWindow
+public sealed class TKEngineWindow
 {
 
     private readonly NativeWindow window;
-    private readonly Func<EngineWindow, IScene> sceneInit;
+    private readonly Func<TKEngineWindow, IScene> sceneInit;
 
     private bool Running;
 
-    public EngineWindow(Func<EngineWindow, IScene> sceneInit, string title, Vector2i size)
+    public TKEngineWindow(Func<TKEngineWindow, IScene> sceneInit, string title, Vector2i size)
     {
         window = new NativeWindow(
             new NativeWindowSettings

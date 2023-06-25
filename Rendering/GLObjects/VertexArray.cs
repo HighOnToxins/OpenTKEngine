@@ -12,7 +12,7 @@ public sealed class VertexArray: GLObject
     private readonly Dictionary<uint, IBuffer> attachedBuffers;
     private ShaderProgram? program;
 
-    public IBuffer? ElementBuffer { get; private set; } 
+    public IBuffer? ElementBuffer { get; private set; }
 
     public VertexArray() 
     {

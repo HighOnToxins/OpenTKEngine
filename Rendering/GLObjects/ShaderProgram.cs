@@ -70,6 +70,11 @@ public sealed class ShaderProgram: GLObject
 
     }
 
+    public static ShaderProgram LoadFromFiles(string vertexShaderPath, string fragmentShaderPath)
+    {
+        return new ShaderProgram(File.ReadAllText(vertexShaderPath), File.ReadAllText(fragmentShaderPath));
+    }
+
     private readonly Dictionary<string, ProgramAttribute> attributes;
 
     private readonly Dictionary<string, ProgramUniform> uniforms;
