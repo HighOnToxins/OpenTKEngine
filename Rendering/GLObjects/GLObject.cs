@@ -10,15 +10,22 @@ public abstract class GLObject : IDisposable
 
     public GLObject()
     {
-        int length = 0;
-        label = GL.GetObjectLabel(Identifier, Handle, 255, ref length);
     }
 
-    private string label;
+    private string? label;
     public string Label
     {
         get
         {
+            if(label is null)
+            {
+                int length = 0;
+                int maxLabelLength = 0;
+                GL.GetInteger(GetPName.MaxLabelLength, ref maxLabelLength);
+                label = GL.GetObjectLabel(Identifier, Handle, maxLabelLength, ref length);
+                return label;
+            }
+
             return label;
         }
         set

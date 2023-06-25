@@ -78,7 +78,7 @@ public sealed class VertexArray: GLObject
             }
             else if(attribute.Program != program)
             {
-                throw new ArgumentException($"The given attribute {attribute.Name}, did not originate from the correct shader!");
+                throw new ArgumentException($"The given attribute {attribute.Name} originated from program shader with label \"{attribute.Program.Label}\", but expected shader with label \"{program.Label}\".");
             }
         }
 
