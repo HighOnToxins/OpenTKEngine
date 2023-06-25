@@ -10,6 +10,7 @@ public sealed class VertexArray: GLObject
     private readonly VertexArrayHandle arrayHandle;
 
     private readonly Dictionary<uint, IBuffer> attachedBuffers;
+    private ShaderProgram? program;
 
     public IBuffer? ElementBuffer { get; private set; } 
 
@@ -66,6 +67,18 @@ public sealed class VertexArray: GLObject
             if(buffer.AttributeTypes[i] != attributes[i].AttribType)
             {
                 throw new ArgumentException($"Attribute {attributes[i].Name} of type {attributes[i].AttribType} did not match the the buffer which expected {buffer.AttributeTypes[i]}.");
+            }
+        }
+
+        foreach(ProgramAttribute attribute in attributes)
+        {
+            if(program is null)
+            {
+                program = attribute.Program;
+            }
+            else if(attribute.Program != program)
+            {
+                throw new ArgumentException($"The given attribute {attribute.Name}, did not originate from the correct shader!");
             }
         }
 
