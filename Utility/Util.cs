@@ -36,7 +36,7 @@ public static class Util
         _ => throw new NotSupportedException("The given attribute type was not supported!"),
     };
 
-    public static VertexAttribPointerType TypeToPointerType(Type type)
+    public static VertexAttribPointerType TypeToPointerType(Type type) 
         => type.Name switch
     {
         nameof(Byte) =>   VertexAttribPointerType.UnsignedByte,

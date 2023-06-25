@@ -44,16 +44,24 @@ public sealed class VertexArray: GLObject
         int offset = 0;
         for(int i = 0; i < attributes.Length; i++)
         {
-            GL.VertexAttribPointer(attributes[i].Index, attributes[i].ValueCount, buffer.ValueType, false, buffer.ElementValueCount * typeSize, offset);
+            if(VertexAttribPointerType.Byte <= buffer.ValueType && buffer.ValueType <= VertexAttribPointerType.UnsignedInt)
+            {
+                GL.VertexAttribIPointer(attributes[i].Index, attributes[i].ValueCount, (VertexAttribIType)buffer.ValueType, buffer.VertexValueCount * typeSize, offset);
+            }
+            else
+            {
+                GL.VertexAttribPointer(attributes[i].Index, attributes[i].ValueCount, buffer.ValueType, false, buffer.VertexValueCount * typeSize, offset);
+            }
+
             GL.VertexAttribDivisor(attributes[i].Index, divisor);
             GL.EnableVertexAttribArray(attributes[i].Index);
             offset += attributes[i].ValueCount * typeSize;
         }
 
-        if(divisor == 0)
+        //TODO: Update MaxVertexCount dynamically as buffers are updated.
+        if(divisor == 0 && buffer.VertexCount > MaxVertexCount)
         {
-            int vertexCount = buffer.ValueCount / buffer.ElementValueCount;
-            if(vertexCount > MaxVertexCount) MaxVertexCount = vertexCount;
+            MaxVertexCount = buffer.VertexCount;
         }
     }
 

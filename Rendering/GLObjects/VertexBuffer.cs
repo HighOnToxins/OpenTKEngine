@@ -12,7 +12,9 @@ public interface IBuffer
 {
     public int ValueCount { get; }
 
-    public int ElementValueCount { get; }
+    public int VertexValueCount { get; }
+
+    public int VertexCount { get; }
 
     public AttributeType[] AttributeTypes { get; }
 
@@ -37,7 +39,7 @@ public sealed class VertexBuffer<T>: GLObject, IBuffer where T : unmanaged
         {
             AttributeTypes = new AttributeType[] { Util.TypeToAttributeType(typeof(T)) };
             ValueType = Util.TypeToPointerType(typeof(T));
-            ElementValueCount = Util.ValueCount(AttributeTypes[0]);
+            VertexValueCount = Util.ValueCount(AttributeTypes[0]);
         }
         catch
         {
@@ -47,7 +49,7 @@ public sealed class VertexBuffer<T>: GLObject, IBuffer where T : unmanaged
             ReadTypesFromStruct(out AttributeType[] attributeTypes, out VertexAttribPointerType valueType, out int elementSize);
             AttributeTypes = attributeTypes;
             ValueType = valueType;
-            ElementValueCount = elementSize;
+            VertexValueCount = elementSize;
         }
     }
 
@@ -89,15 +91,17 @@ public sealed class VertexBuffer<T>: GLObject, IBuffer where T : unmanaged
     {
     }
 
-    public int ValueCount { get; private set; }
+    public int ValueCount { get => VertexValueCount * VertexCount; }
 
-    public int ElementValueCount { get; private init; }
+    public int VertexValueCount { get; private init; }
+
+    public int VertexCount { get; private set; }
 
     public AttributeType[] AttributeTypes { get; private init; }
 
     public VertexAttribPointerType ValueType { get; private init; }
 
-    public override ObjectIdentifier Identifier => ObjectIdentifier.VertexArray;
+    public override ObjectIdentifier Identifier => ObjectIdentifier.Buffer;
 
     protected override uint Handle => (uint)bufferHandle.Handle;
 
@@ -105,7 +109,7 @@ public sealed class VertexBuffer<T>: GLObject, IBuffer where T : unmanaged
     {
         Bind();
         GL.BufferData(target, data, BufferUsageARB.StaticDraw); //TODO: Figure out the difference of usage.
-        ValueCount = data.Length * ElementValueCount;
+        VertexCount = data.Length;
     }
 
     public override void Bind()

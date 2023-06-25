@@ -20,6 +20,7 @@ public sealed class Texture: GLObject
         }
 
         textureHandle = GL.GenTexture();
+        SetUnit(TextureUnit.Texture0);
         GL.TexImage2D(TextureTarget.Texture2d, 0, InternalFormat.Rgba, image.Width, image.Height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, image.Data);
 
         //TODO: Add the ability to change all these settings.
@@ -35,9 +36,14 @@ public sealed class Texture: GLObject
 
     protected override uint Handle => (uint) textureHandle.Handle;
 
+    public void SetUnit(TextureUnit textureUnit)
+    {
+        GL.ActiveTexture(textureUnit);
+        Bind();
+    }
+
     public override void Bind()
     {
-        GL.ActiveTexture(TextureUnit.Texture0);
         GL.BindTexture(TextureTarget.Texture2d, textureHandle);
     }
 

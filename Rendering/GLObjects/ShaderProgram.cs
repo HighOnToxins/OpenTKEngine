@@ -3,8 +3,6 @@ using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Mathematics;
 using OpenTKEngine.Utility;
-using System;
-using System.Diagnostics;
 
 namespace OpenTKEngine.Rendering.GLObjects;
 
@@ -137,7 +135,7 @@ public class ProgramAttribute {
     {
         this.programHandle = programHandle;
         Name = name;
-        Size = size;
+        Size = size;  //TODO: Use the size, for value count. Since, size is array size.
         AttribType = type;
         index = (uint) GL.GetAttribLocation(programHandle, Name);
         ValueCount = Util.ValueCount(AttribType);
@@ -175,9 +173,9 @@ public class ProgramUniform
     {
         this.programHandle = programHandle;
         Name = name;
-        Size = size;
+        Size = size; //Use the size, for value count.
         UniformType = type;
-        Index = GL.GetUniformLocation(programHandle, Name);
+        Location = GL.GetUniformLocation(programHandle, Name);
     }
     
     public string Name;
@@ -185,27 +183,39 @@ public class ProgramUniform
 
     public UniformType UniformType { get; private init; }
 
-    public int Index { get;  }
+    public int Location { get;  }
 
     public void SetValue(object value)
     {
+        //TODO: Add type checking to texture units.
+        GL.UseProgram(programHandle);
+        if(value is TextureUnit textureUnit) {
+            GL.Uniform1i(Location, (int)(textureUnit - TextureUnit.Texture0));
+            return;
+        }
+        else if(value is TextureUnit[] unitArray)
+        {
+            int[] intArr = unitArray.Select(u => (int)(u - TextureUnit.Texture0)).ToArray();
+            GL.Uniform1i(Location, intArr.Length, intArr);
+            return;
+        }
+        
         if(UniformType != (UniformType)Util.TypeToAttributeType(value.GetType())) throw new ArgumentException("The given type did not match the type of the uniform.");
 
-        GL.UseProgram(programHandle);
         switch(value)
         {
-            case int i:         GL.Uniform1i(Index, i); break;
-            case float f:       GL.Uniform1f(Index, f); break;
-            case double d:      GL.Uniform1d(Index, d); break;
-            case int[] ii:      GL.Uniform1i(Index, ii.Length, ii); break;
-            case Vector2 v2:    GL.Uniform2f(Index, v2); break;
-            case Vector3 v3:    GL.Uniform3f(Index, v3); break;
-            case Vector4 v4:    GL.Uniform4f(Index, v4); break;
-            case Vector2d d2:   GL.Uniform2d(Index, d2); break;
-            case Vector3d d3:   GL.Uniform3d(Index, d3); break;
-            case Vector4d d4:   GL.Uniform4d(Index, d4); break;
-            case Matrix4 m44:   GL.UniformMatrix4f(Index, false, m44); break;
-            case Matrix4d d44:  GL.UniformMatrix4d(Index, false, d44); break;
+            case int i:         GL.Uniform1i(Location, i); break;
+            case float f:       GL.Uniform1f(Location, f); break;
+            case double d:      GL.Uniform1d(Location, d); break;
+            case int[] ii:      GL.Uniform1i(Location, ii.Length, ii); break;
+            case Vector2 v2:    GL.Uniform2f(Location, v2); break;
+            case Vector3 v3:    GL.Uniform3f(Location, v3); break;
+            case Vector4 v4:    GL.Uniform4f(Location, v4); break;
+            case Vector2d d2:   GL.Uniform2d(Location, d2); break;
+            case Vector3d d3:   GL.Uniform3d(Location, d3); break;
+            case Vector4d d4:   GL.Uniform4d(Location, d4); break;
+            case Matrix4 m44:   GL.UniformMatrix4f(Location, false, m44); break;
+            case Matrix4d d44:  GL.UniformMatrix4d(Location, false, d44); break;
             default: throw new NotSupportedException("The given object was not supported.");
         }
     }
