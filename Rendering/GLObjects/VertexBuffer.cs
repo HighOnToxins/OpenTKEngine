@@ -111,7 +111,16 @@ public sealed class VertexBuffer<T>: GLObject, IBuffer where T : unmanaged
     public void SetData(params T[] data) 
     {
         Bind();
-        GL.BufferData(target, data, BufferUsageARB.StaticDraw); //TODO: Figure out the usage of usage.
+
+        if(data.Length > VertexCount)
+        {
+            GL.BufferData(target, data, BufferUsageARB.StaticDraw); //TODO: Figure out the usage of usage.
+        }
+        else
+        {
+            GL.BufferSubData(target, 0, data);
+        }
+
         VertexCount = data.Length;
     }
 
