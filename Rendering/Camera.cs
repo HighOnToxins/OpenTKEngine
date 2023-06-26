@@ -1,6 +1,8 @@
 ﻿
 using OpenTK.Mathematics;
+using OpenTK.Windowing.GraphicsLibraryFramework;
 using OpenTKEngine.Rendering.GLObjects;
+using OpenTKEngine.Utility;
 
 namespace OpenTKEngine.Rendering;
 
@@ -22,55 +24,57 @@ public interface IReadOnlyCamera
 public sealed class Camera: IReadOnlyCamera
 {
     public Vector3 Position { get; set; }
-    
     public Vector2 ScreenOffset { get; set; }
 
     public Vector3 Direction { get; set; }
     public float Zoom { get; set; }
-    public float Angle { get; set; }
-
-    public Vector2 ScreenSize { get; set; }
+    public float Rotation { get; set; }
     public Vector2 DepthRange { get; set; }
-
     public Vector3 WorldUp { get; set; }
     public Vector3 CameraUp
     {
-        get => (new Vector4(WorldUp, 0) * Matrix4.CreateFromAxisAngle(Direction, Angle)).Xyz;
-        set => Angle = Vector3.CalculateAngle(WorldUp, value); 
+        get => (new Vector4(WorldUp, 0) * Matrix4.CreateFromAxisAngle(Direction, Rotation)).Xyz;
+        set => Rotation = Vector3.CalculateAngle(WorldUp, value);
     }
 
-    private readonly bool isOrthographic;
+    public Vector2 ScreenSize { get; set; }
+    public float Ratio { 
+        get => ScreenSize.Y / ScreenSize.X;
+        set => ScreenSize = Util.Scale(1f/value) * 2f; 
+    }
 
-    public Camera(Vector3 position, Vector3 direction, float angle, float zoom, Vector3 up, bool isOrthographic)
+    public bool IsOrthographic { get; set; }
+
+    public Camera(Vector3 position, Vector3 direction, Vector2 screenOffset, float rotation, float zoom, Vector3 up, float ratio, bool isOrthographic)
     {
         Position = position;
         Direction = direction;
         Zoom = zoom;
-        Angle = angle;
-
+        ScreenOffset = screenOffset;
+        Rotation = rotation;
+        DepthRange = new(1, 100);
         WorldUp = up;
 
-        ScreenSize = new(2, 2);
-        DepthRange = new(1, 100);
-
-        this.isOrthographic = isOrthographic;
-        ScreenOffset = new(0, 0);
+        Ratio = ratio;
+        IsOrthographic = isOrthographic;
     }
 
     public Camera(Vector3 position, Vector3 direction, bool isOrthographic) : this(
         position,
         direction,
+        -Vector2.One,
         0f,
         1f,
         Vector3.UnitY,
+        1f,
         isOrthographic
     )
     {
     }
 
     public Camera() : this(
-        new Vector3(0, 0, -1), 
-        new Vector3(0, 0, 1), 
+        -Vector3.UnitZ,
+        Vector3.UnitZ,
         true
     )
     {
@@ -83,15 +87,26 @@ public sealed class Camera: IReadOnlyCamera
 
     private Matrix4 Projection
     {
-        get => isOrthographic
-            ? Matrix4.CreateOrthographicOffCenter(
-                ScreenOffset.X + Position.X * Zoom, ScreenOffset.X + (Position.X + ScreenSize.X) * Zoom,
-                ScreenOffset.Y + Position.Y * Zoom, ScreenOffset.Y + (Position.Y + ScreenSize.Y) * Zoom,
-                DepthRange.X * Zoom, DepthRange.Y * Zoom)
-            : Matrix4.CreatePerspectiveOffCenter(
-                ScreenOffset.X + Position.X * Zoom, ScreenOffset.X + (Position.X + ScreenSize.X) * Zoom,
-                ScreenOffset.Y + Position.Y * Zoom, ScreenOffset.Y + (Position.Y + ScreenSize.Y) * Zoom,
-                DepthRange.X * Zoom, DepthRange.Y * Zoom);
+        get {
+            Vector2 bottomLeft = ScreenSize * ScreenOffset / 2 * Zoom;
+            Vector2 topRight = (ScreenSize * (ScreenOffset / 2 + Vector2.One)) * Zoom;
+            Vector2 depth = DepthRange * Zoom;
+
+            if(IsOrthographic)
+            {
+                return Matrix4.CreateOrthographicOffCenter(bottomLeft.X, topRight.X, bottomLeft.Y, topRight.Y, depth.X, depth.Y);
+            }
+            else
+            {
+                return Matrix4.CreatePerspectiveOffCenter(bottomLeft.X, topRight.X, bottomLeft.Y, topRight.Y, depth.X, depth.Y);
+            }
+        }
+    }
+
+    public void CenterOn(Vector2 screenPosition)
+    {
+        Position += ScreenToWorldPosition(ScreenOffset - screenPosition);
+        ScreenOffset = screenPosition;
     }
 
     public void AssignMatrices(ShaderProgram program, string viewUniformName, string projectionUniformName)
