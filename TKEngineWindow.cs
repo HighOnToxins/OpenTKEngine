@@ -45,6 +45,7 @@ public sealed class TKEngineWindow
     }
 
     public double DeltaTime { get; private set; }
+    public double Time { get; private set; }
 
     public float Ratio { get; set; }
 
@@ -53,6 +54,7 @@ public sealed class TKEngineWindow
     public void Run()
     {
         GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+        Resize(new ResizeEventArgs());
 
         IScene scene = sceneInit.Invoke(this);
 
@@ -66,19 +68,24 @@ public sealed class TKEngineWindow
         window.MouseLeave += scene.MouseLeave;
         window.Closing += scene.Closing;
         window.Closing += Closing;
+        window.Resize += _ => scene.Render();
 
-        Running = true;
+        Stopwatch timer = Stopwatch.StartNew();
 
-        long prevTime = Stopwatch.GetTimestamp();
+        long prevTime = timer.ElapsedTicks;
         long thisTime;
 
+        Running = true;
         while(Running)
         {
-            thisTime = Stopwatch.GetTimestamp();
-            DeltaTime = (float)(thisTime - prevTime) / Stopwatch.Frequency;
+            thisTime = timer.ElapsedTicks;
+            DeltaTime = (thisTime - prevTime) / Stopwatch.Frequency;
+            Time = timer.ElapsedTicks / Stopwatch.Frequency;
 
             NativeWindow.ProcessWindowEvents(false);
+
             scene.Update();
+            scene.Render();
 
             prevTime = thisTime;
         }
@@ -102,24 +109,7 @@ public sealed class TKEngineWindow
 
     private void Resize(ResizeEventArgs obj)
     {
-        Vector2i screenSize;
-        if(Ratio <= 0)
-        {
-            screenSize = window.ClientSize;
-        }
-        else
-        {
-            screenSize = new((int)(Ratio * window.ClientSize.Y), 0);
-
-            if(window.ClientSize.X > screenSize.X)
-            {
-                screenSize.Y = window.ClientSize.Y;
-            }
-            else
-            {
-                screenSize = new(window.ClientSize.X, (int)(window.ClientSize.X / Ratio));
-            }
-        }
+        Vector2i screenSize = (Vector2i) Util.Rescale(window.ClientSize, Ratio);
 
         GL.Viewport(
             (window.ClientSize.X - screenSize.X) / 2,

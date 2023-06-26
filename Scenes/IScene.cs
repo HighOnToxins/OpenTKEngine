@@ -6,6 +6,7 @@ namespace OpenTKEngine.Scenes;
 public interface IScene
 {
     public void Update() { }
+    public void Render() { }
     
     public void KeyDown(KeyboardKeyEventArgs args) { }
     public void KeyUp(KeyboardKeyEventArgs args) { }

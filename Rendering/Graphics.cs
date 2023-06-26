@@ -31,7 +31,6 @@ public sealed class Graphics
         }
 
         instanceGroup.Add(instance);
-
     }
 
     //TODO: Add the ability to change an existing shape.
