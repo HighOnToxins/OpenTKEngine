@@ -104,36 +104,33 @@ public sealed class ShaderProgram: GLObject
 
     public void Draw(VertexArray vertexArray, PrimitiveType primitiveType = PrimitiveType.Triangles)
     {
-        Bind();
-        vertexArray.Bind();
-        GL.DrawArrays(primitiveType, 0, vertexArray.MaxVertexCount());
-    }
-
-    public void DrawElements(VertexArray vertexArray, PrimitiveType primitiveType = PrimitiveType.Triangles)
-    {
-        if(vertexArray.ElementBuffer is null) throw new ArgumentException("No element buffer was attached to the vertex array!");
+        int instanceCount = vertexArray.MaxInstanceCount();
 
         Bind();
         vertexArray.Bind();
-        DrawElementsType elementType = (DrawElementsType)vertexArray.ElementBuffer.ValueType;
-        GL.DrawElements(primitiveType, vertexArray.ElementBuffer.ValueCount, elementType, 0);
-    }
+        if(vertexArray.ElementBuffer is not null)
+        {
+            DrawElementsType elementType = (DrawElementsType)vertexArray.ElementBuffer.ValueType;
 
-    public void DrawInstanced(VertexArray vertexArray, int instanceCount, PrimitiveType primitiveType = PrimitiveType.Triangles)
-    {
-        Bind();
-        vertexArray.Bind();
-        GL.DrawArraysInstanced(primitiveType, 0, vertexArray.MaxVertexCount(), instanceCount);
-    }
+            if(instanceCount > 1)
+            {
+                GL.DrawElementsInstanced(primitiveType, vertexArray.ElementBuffer.ValueCount, elementType, 0, instanceCount);
+                return;
+            }
 
-    public void DrawElementsInstanced(VertexArray vertexArray, int instanceCount, PrimitiveType primitiveType = PrimitiveType.Triangles)
-    {
-        if(vertexArray.ElementBuffer is null) throw new ArgumentException("No element buffer was attached to the vertex array!");
+            GL.DrawElements(primitiveType, vertexArray.ElementBuffer.ValueCount, elementType, 0);
+            return;
+        }
 
-        Bind();
-        vertexArray.Bind();
-        DrawElementsType elementType = (DrawElementsType)vertexArray.ElementBuffer.ValueType;
-        GL.DrawElementsInstanced(primitiveType, vertexArray.ElementBuffer.ValueCount, elementType, 0, instanceCount);
+        int vertexCount = vertexArray.MaxVertexCount();
+
+        if(instanceCount > 1)
+        {
+            GL.DrawArraysInstanced(primitiveType, 0, vertexCount, instanceCount);
+            return;
+        }
+
+        GL.DrawArrays(primitiveType, 0, vertexCount);
     }
 
     public override void Bind()
@@ -155,20 +152,24 @@ public class ProgramAttribute {
     {
         Program = program;
         Name = name;
-        Size = size; 
+        ArrayLength = size; 
         AttribType = type;
         this.index = index;
-        ValueCount = Util.ValueCount(AttribType) * size;
+        Size = Util.Size(AttribType) * size;
+        AttribCount = Util.AttribCount(AttribType);
     }
 
     public string Name { get; private set; }
 
-    public int Size { get; private init; }
+    public int ArrayLength { get; private init; }
+
+    public int Size { get; internal set; }
+
+    public int AttribCount { get; internal set; }
 
     public AttributeType AttribType { get; private init; }
 
     private uint index;
-    public int ValueCount { get; private set; }
 
     public uint Index
     {
@@ -205,7 +206,7 @@ public class ProgramUniform
 
     public int Location { get;  }
 
-    public void SetValue(object value)
+    public void SetValue(object value) 
     {
         if(UniformType != (UniformType)Util.TypeToAttributeType(value.GetType())) throw new ArgumentException("The given type did not match the type of the uniform.");
 

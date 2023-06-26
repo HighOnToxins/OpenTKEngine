@@ -40,7 +40,7 @@ public sealed class VertexBuffer<T>: GLObject, IBuffer where T : unmanaged
         {
             AttributeTypes = new AttributeType[] { Util.TypeToAttributeType(typeof(T)) };
             ValueType = Util.TypeToPointerType(typeof(T));
-            VertexValueCount = Util.ValueCount(AttributeTypes[0]);
+            VertexValueCount = Util.Size(AttributeTypes[0]);
         }
         catch
         {
@@ -74,7 +74,7 @@ public sealed class VertexBuffer<T>: GLObject, IBuffer where T : unmanaged
         {
             attributeTypes[i] = Util.TypeToAttributeType(fieldTypes[i]);
             VertexAttribPointerType pointerType = Util.TypeToPointerType(fieldTypes[i]);
-            vertexValueCount += Util.ValueCount(attributeTypes[i]);
+            vertexValueCount += Util.Size(attributeTypes[i]);
 
             if(valueType != pointerType)
             {

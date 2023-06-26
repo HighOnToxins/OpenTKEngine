@@ -9,7 +9,7 @@ public sealed class VertexArray: GLObject
 {
     private readonly VertexArrayHandle arrayHandle;
 
-    private readonly Dictionary<uint, IBuffer> attachedBuffers;
+    private readonly Dictionary<uint, (IBuffer buffer, uint divisor)> vertexBuffers;
     private ShaderProgram? program;
 
     public IBuffer? ElementBuffer { get; private set; }
@@ -17,15 +17,15 @@ public sealed class VertexArray: GLObject
     public VertexArray() 
     {
         arrayHandle = GL.GenVertexArray();
-        attachedBuffers = new();
+        vertexBuffers = new();
     }    
 
     public int MaxVertexCount()
     {
         int maxVertexCount = 0;
-        foreach(IBuffer buffer in attachedBuffers.Values)
+        foreach((IBuffer buffer, uint divisor) in vertexBuffers.Values)
         {
-            if(buffer.VertexCount > maxVertexCount)
+            if(divisor == 0 && buffer.VertexCount > maxVertexCount)
             {
                 maxVertexCount = buffer.VertexCount;
             }
@@ -33,22 +33,17 @@ public sealed class VertexArray: GLObject
         return maxVertexCount;
     }
 
-    public int MinVertexCount()
+    public int MaxInstanceCount()
     {
-        if(attachedBuffers.Values.Count == 0)
+        int maxInstanceCount = 0;
+        foreach((IBuffer buffer, uint divisor) in vertexBuffers.Values)
         {
-            return 0;
-        }
-
-        int maxVertexCount = int.MaxValue;
-        foreach(IBuffer buffer in attachedBuffers.Values)
-        {
-            if(buffer.VertexCount < maxVertexCount)
+            if(divisor != 0 && buffer.VertexCount > maxInstanceCount)
             {
-                maxVertexCount = buffer.VertexCount;
+                maxInstanceCount = buffer.VertexCount * (int)divisor;
             }
         }
-        return maxVertexCount;
+        return maxInstanceCount;
     }
 
     public override ObjectIdentifier Identifier => ObjectIdentifier.VertexArray;
@@ -87,25 +82,34 @@ public sealed class VertexArray: GLObject
 
         int typeSize = Util.TypeSize(buffer.ValueType);
         int offset = 0;
+        int stride = attributes.Select(a => a.Size * a.AttribCount).Sum() * typeSize;
         for(int i = 0; i < attributes.Length; i++)
         {
-            if(VertexAttribPointerType.Byte <= buffer.ValueType && buffer.ValueType <= VertexAttribPointerType.UnsignedInt)
+            int columnOffset = 0;
+            for(uint column = 0; column < attributes[i].AttribCount; column++)
             {
-                GL.VertexAttribIPointer(attributes[i].Index, attributes[i].ValueCount, (VertexAttribIType)buffer.ValueType, buffer.VertexValueCount * typeSize, offset);
-            }
-            else if(buffer.ValueType == VertexAttribPointerType.Double)
-            {
-                GL.VertexAttribLPointer(attributes[i].Index, attributes[i].ValueCount, (VertexAttribLType)buffer.ValueType, buffer.VertexValueCount * typeSize, offset);
-            }
-            else{
-                GL.VertexAttribPointer(attributes[i].Index, attributes[i].ValueCount, buffer.ValueType, false, buffer.VertexValueCount * typeSize, offset);
+                int totalOffset = offset + columnOffset;
+                if(VertexAttribPointerType.Byte <= buffer.ValueType && buffer.ValueType <= VertexAttribPointerType.UnsignedInt)
+                {
+                    GL.VertexAttribIPointer(attributes[i].Index + column, attributes[i].Size, (VertexAttribIType)buffer.ValueType, stride, totalOffset);
+                }
+                else if(buffer.ValueType == VertexAttribPointerType.Double)
+                {
+                    GL.VertexAttribLPointer(attributes[i].Index + column, attributes[i].Size, (VertexAttribLType)buffer.ValueType, stride, totalOffset);
+                }
+                else{
+                    GL.VertexAttribPointer(attributes[i].Index + column, attributes[i].Size, buffer.ValueType, false, stride, totalOffset);
+                }
+
+                GL.VertexAttribDivisor(attributes[i].Index + column, divisor);
+                GL.EnableVertexAttribArray(attributes[i].Index + column);
+
+                columnOffset += attributes[i].Size * typeSize;
             }
 
-            GL.VertexAttribDivisor(attributes[i].Index, divisor);
-            GL.EnableVertexAttribArray(attributes[i].Index);
-            offset += attributes[i].ValueCount * typeSize;
+            offset += attributes[i].AttribCount * attributes[i].Size * typeSize;
 
-            if(divisor == 0) attachedBuffers.Add(attributes[i].Index, buffer);
+            vertexBuffers.Add(attributes[i].Index, (buffer, divisor));
         }
     }
 
