@@ -9,11 +9,13 @@ public static class Util
 {
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float Rlerp(float inter, float inStart, float inEnd, float outStart, float outEnd)
-        => (outEnd - outStart) / (inEnd - inStart) * (inter - inEnd) + outEnd;
+        => (inter - inEnd) * (outEnd - outStart) / (inEnd - inStart) + outEnd;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Vector2 Proj(this Vector2 vec1, Vector2 vec2)
         => Vector2.Dot(vec1, vec2) / vec2.LengthSquared * vec2;
+    
+
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float ProjLength(this Vector2 vec1, Vector2 vec2)
@@ -63,7 +65,8 @@ public static class Util
             : throw new NotImplementedException(),
     };
 
-    public static int ValueCount(AttributeType type) => type switch
+    //TODO: Add other matrices.
+    public static int Size(AttributeType type) => type switch
     {
         AttributeType.Bool => 1,
         AttributeType.Int => 1,
@@ -76,8 +79,26 @@ public static class Util
         AttributeType.DoubleVec2 => 2,
         AttributeType.DoubleVec3 => 3,
         AttributeType.DoubleVec4 => 4,
-        AttributeType.FloatMat4 => 4 * 4,
-        AttributeType.DoubleMat4 => 4 * 4,
+        AttributeType.FloatMat4 => 4,
+        AttributeType.DoubleMat4 => 4,
+        _ => throw new NotSupportedException("The given attribute type was not supported!"),
+    };
+
+    public static int AttribCount(AttributeType type) => type switch
+    {
+        AttributeType.Bool => 1,
+        AttributeType.Int => 1,
+        AttributeType.UnsignedInt => 1,
+        AttributeType.Float => 1,
+        AttributeType.Double => 1,
+        AttributeType.FloatVec2 => 1,
+        AttributeType.FloatVec3 => 1,
+        AttributeType.FloatVec4 => 1,
+        AttributeType.DoubleVec2 => 1,
+        AttributeType.DoubleVec3 => 1,
+        AttributeType.DoubleVec4 => 1,
+        AttributeType.FloatMat4 => 4,
+        AttributeType.DoubleMat4 => 4,
         _ => throw new NotSupportedException("The given attribute type was not supported!"),
     };
 
@@ -93,4 +114,39 @@ public static class Util
         VertexAttribPointerType.Double => sizeof(double),
         _ => throw new NotSupportedException("The given type was not supported!"),
     };
+
+    public static Vector2 Scale(float ratio)
+    {
+        Vector2 screenSize;
+        if(ratio <= 0)
+        {
+            screenSize = Vector2.One;
+        }
+        else if(ratio <= 1)
+        {
+            screenSize = new(1, ratio);
+        }
+        else
+        {
+            screenSize = new(1f / ratio, 1);
+        }
+
+        return screenSize;
+    }
+
+    public static Vector2 Rescale(Vector2 size, float ratio)
+    {
+        if(ratio <= 0)
+        {
+            return size;
+        }
+        else if(size.X > ratio * size.Y)
+        {
+            return new(ratio * size.Y, size.Y);
+        }
+        else
+        {
+            return new(size.X, size.X / ratio);
+        }
+    }
 }
