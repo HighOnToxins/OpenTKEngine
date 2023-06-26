@@ -5,6 +5,7 @@ using OpenTKEngine.Rendering.GLObjects;
 
 namespace OpenTKEngine.Rendering;
 
+//TODO: Consider making mesh into interface, and moving element buffer to mesh<T>.
 public abstract class Mesh: IDisposable
 {
     public static readonly Mesh<Vector3> Box = new(

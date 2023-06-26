@@ -19,6 +19,7 @@ public interface IBuffer
     public AttributeType[] AttributeTypes { get; }
 
     public VertexAttribPointerType ValueType { get; }
+
     public bool IsElementBuffer { get; }
 
     public void Bind();
