@@ -10,7 +10,9 @@ using System.Diagnostics;
 
 namespace OpenTKEngine;
 
-// TODO: Add Graphics, SceneManager, Button, Entity, InputManager, PhysicsObject.
+// TODO: Add FrameBuffer class.
+// TODO: Add SceneManager, Button, Entity, InputManager, PhysicsObject.
+// TODO: Create GL call dependency optimizations.
 
 public sealed class TKEngineWindow
 {
@@ -79,15 +81,15 @@ public sealed class TKEngineWindow
         while(Running)
         {
             thisTime = timer.ElapsedTicks;
-            DeltaTime = (thisTime - prevTime) / Stopwatch.Frequency;
-            Time = timer.ElapsedTicks / Stopwatch.Frequency;
+            DeltaTime = (float) (thisTime - prevTime) / Stopwatch.Frequency;
+            prevTime = timer.ElapsedTicks;
+            Time = (float)timer.ElapsedTicks / Stopwatch.Frequency;
 
             NativeWindow.ProcessWindowEvents(false);
 
             scene.Update();
             scene.Render();
 
-            prevTime = thisTime;
         }
     }
 

@@ -6,31 +6,31 @@ namespace OpenTKEngine.Rendering;
 
 public sealed class Graphics
 {
-    private readonly Dictionary<IMaterial, IMaterialGroup> groups;
+    private readonly Dictionary<IMaterial, IGraphicsBatchList> batchLists;
 
     public IReadOnlyCamera? Camera { get; set; }
 
     public Graphics(IReadOnlyCamera? camera = null) 
     {
         Camera = camera;
-        groups = new Dictionary<IMaterial, IMaterialGroup>();
+        batchLists = new Dictionary<IMaterial, IGraphicsBatchList>();
     }
 
     public void Add<T1, T2>(Material<T1, T2> material, Mesh<T1> mesh, T2 instance) where T1 : unmanaged where T2 : unmanaged
     {
-        if(!groups.TryGetValue(material, out IMaterialGroup? materGroup) || materGroup is not MaterialGroup<T1, T2> materialGroup)
+        if(!batchLists.TryGetValue(material, out IGraphicsBatchList? materGroup) || materGroup is not GraphicsBatchList<T1, T2> batchList)
         {
-            materialGroup = new MaterialGroup<T1, T2>(material);
-            groups.Add(material, materialGroup);
+            batchList = new GraphicsBatchList<T1, T2>(material);
+            batchLists.Add(material, batchList);
         }
 
-        if(!materialGroup.TryGetValue(mesh, out InstanceGroup<T1, T2>? instanceGroup))
+        if(!batchList.TryGetValue(mesh, out GraphicsBatch<T1, T2>? batch))
         {
-            instanceGroup = new InstanceGroup<T1, T2>(material, mesh);
-            materialGroup.Add(mesh, instanceGroup);
+            batch = new GraphicsBatch<T1, T2>(material, mesh);
+            batchList.Add(mesh, batch);
         }
 
-        instanceGroup.Add(instance);
+        batch.Add(instance);
     }
 
     //TODO: Add the ability to change an existing shape.
@@ -39,27 +39,27 @@ public sealed class Graphics
 
     public void Clear()
     {
-        foreach(IMaterialGroup materialGroup in groups.Values) 
+        foreach(IGraphicsBatchList batchList in batchLists.Values) 
         {
-            materialGroup.Clear();
+            batchList.Clear();
         }
     }
 
     public void Draw()
     {
-        foreach(IMaterialGroup materialGroup in groups.Values)
+        foreach(IGraphicsBatchList materialGroup in batchLists.Values)
         {
             materialGroup.Draw(Camera);
         }
     }
     
-    private sealed class InstanceGroup<T1, T2> where T1 : unmanaged where T2 : unmanaged
+    private sealed class GraphicsBatch<T1, T2> where T1 : unmanaged where T2 : unmanaged
     {
         private readonly VertexArray array;
         private readonly VertexBuffer<T2> instanceBuffer;
         private readonly List<T2> instances;
 
-        public InstanceGroup(Material<T1, T2> material, Mesh<T1> mesh)
+        public GraphicsBatch(Material<T1, T2> material, Mesh<T1> mesh)
         {
             array = new();
             instanceBuffer = new();
@@ -67,8 +67,6 @@ public sealed class Graphics
             array.SetBuffer(instanceBuffer, 1, material.InstanceAttributes);
             instances = new List<T2>();
         }
-
-        //TODO: Keep track of what was updated.
 
         public void Add(T2 instance)
         {
@@ -87,36 +85,36 @@ public sealed class Graphics
         }
     }
 
-    private interface IMaterialGroup
+    private interface IGraphicsBatchList
     {
         public void Draw(IReadOnlyCamera? camera);
         public void Clear();
     }
 
-    private sealed class MaterialGroup<T1, T2>: IMaterialGroup where T1 : unmanaged where T2 : unmanaged
+    private sealed class GraphicsBatchList<T1, T2>: IGraphicsBatchList where T1 : unmanaged where T2 : unmanaged
     {
         private readonly Material<T1, T2> material;
-        private readonly Dictionary<Mesh<T1>, InstanceGroup<T1, T2>> groups;
+        private readonly Dictionary<Mesh<T1>, GraphicsBatch<T1, T2>> groups;
 
-        public MaterialGroup(Material<T1, T2> material)
+        public GraphicsBatchList(Material<T1, T2> material)
         {
             this.material = material;
             groups = new();
         }
 
-        public bool TryGetValue(Mesh<T1> mesh, [NotNullWhen(true)] out InstanceGroup<T1, T2>? result)
+        public bool TryGetValue(Mesh<T1> mesh, [NotNullWhen(true)] out GraphicsBatch<T1, T2>? result)
         {
             return groups.TryGetValue(mesh, out result);
         }
 
-        public void Add(Mesh<T1> mesh, InstanceGroup<T1, T2> instanceGroup)
+        public void Add(Mesh<T1> mesh, GraphicsBatch<T1, T2> instanceGroup)
         {
             groups.Add(mesh, instanceGroup);
         }
 
         public void Clear()
         {
-            foreach(InstanceGroup<T1, T2> group in groups.Values)
+            foreach(GraphicsBatch<T1, T2> group in groups.Values)
             {
                 group.Clear();
             }
@@ -129,7 +127,7 @@ public sealed class Graphics
                 camera.AssignMatrices(material.Shader, material.ViewUniformName, material.ProjectionUniformName);
             }
 
-            foreach(InstanceGroup<T1, T2> group in groups.Values)
+            foreach(GraphicsBatch<T1, T2> group in groups.Values)
             {
                 group.Draw(material.Shader);
             }

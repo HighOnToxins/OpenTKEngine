@@ -27,6 +27,7 @@ public interface IBuffer
     public void Dispose();
 }
 
+//TODO: Rename vertexbuffer to buffer.
 public sealed class VertexBuffer<T>: GLObject, IBuffer where T : unmanaged
 {
     private readonly BufferHandle bufferHandle;
