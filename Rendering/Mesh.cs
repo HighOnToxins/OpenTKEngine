@@ -22,7 +22,7 @@ public abstract class Mesh: IDisposable
         }
     );
 
-    private readonly VertexBuffer<uint>? elementBuffer;
+    private readonly Buffer<uint>? elementBuffer;
 
     public bool HasElements { get => elementBuffer is not null; }
 
@@ -30,7 +30,7 @@ public abstract class Mesh: IDisposable
     { 
         if(elements.Length != 0)
         {
-            elementBuffer = new VertexBuffer<uint>(BufferTargetARB.ElementArrayBuffer, elements);
+            elementBuffer = new Buffer<uint>(BufferTargetARB.ElementArrayBuffer, elements);
         }
     }
 
@@ -55,7 +55,7 @@ public abstract class Mesh: IDisposable
 public class Mesh<T> : Mesh where T : unmanaged
 {
 
-    private readonly VertexBuffer<T> buffer;
+    private readonly Buffer<T> buffer;
 
     public Mesh(T[] vertices, params uint[] elements) : base(elements)
     {
@@ -82,7 +82,7 @@ public class Mesh<T> : Mesh where T : unmanaged
 
 public class Mesh<T1, T2>: Mesh<T1> where T1: unmanaged where T2: unmanaged
 {
-    private readonly VertexBuffer<T2> buffer;
+    private readonly Buffer<T2> buffer;
 
     public Mesh((T1, T2)[] vertices, params uint[] elements) : 
         base(vertices.Select(v => v.Item1).ToArray(), elements)

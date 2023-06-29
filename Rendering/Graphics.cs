@@ -56,7 +56,7 @@ public sealed class Graphics
     private sealed class GraphicsBatch<T1, T2> where T1 : unmanaged where T2 : unmanaged
     {
         private readonly VertexArray array;
-        private readonly VertexBuffer<T2> instanceBuffer;
+        private readonly Buffer<T2> instanceBuffer;
         private readonly List<T2> instances;
 
         public GraphicsBatch(Material<T1, T2> material, Mesh<T1> mesh)

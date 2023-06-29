@@ -27,13 +27,12 @@ public interface IBuffer
     public void Dispose();
 }
 
-//TODO: Rename vertexbuffer to buffer.
-public sealed class VertexBuffer<T>: GLObject, IBuffer where T : unmanaged
+public sealed class Buffer<T>: GLObject, IBuffer where T : unmanaged
 {
     private readonly BufferHandle bufferHandle;
     private readonly BufferTargetARB target;
 
-    public VertexBuffer(BufferTargetARB target = BufferTargetARB.ArrayBuffer)
+    public Buffer(BufferTargetARB target = BufferTargetARB.ArrayBuffer)
     {
         this.target = target;
         bufferHandle = GL.GenBuffer();
@@ -85,12 +84,12 @@ public sealed class VertexBuffer<T>: GLObject, IBuffer where T : unmanaged
         }
     }
 
-    public VertexBuffer(BufferTargetARB target, params T[] data) : this(target)
+    public Buffer(BufferTargetARB target, params T[] data) : this(target)
     {
         SetData(data);
     }
 
-    public VertexBuffer(params T[] data) : this(BufferTargetARB.ArrayBuffer, data)
+    public Buffer(params T[] data) : this(BufferTargetARB.ArrayBuffer, data)
     {
     }
 
