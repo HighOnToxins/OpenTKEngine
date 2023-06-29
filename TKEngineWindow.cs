@@ -81,9 +81,9 @@ public sealed class TKEngineWindow
         while(Running)
         {
             thisTime = timer.ElapsedTicks;
-            DeltaTime = (float) (thisTime - prevTime) / Stopwatch.Frequency;
+            DeltaTime = (double) (thisTime - prevTime) / Stopwatch.Frequency;
             prevTime = timer.ElapsedTicks;
-            Time = (float)timer.ElapsedTicks / Stopwatch.Frequency;
+            Time = (double)timer.ElapsedTicks / Stopwatch.Frequency;
 
             NativeWindow.ProcessWindowEvents(false);
 
