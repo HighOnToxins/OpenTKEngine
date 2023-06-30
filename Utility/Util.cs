@@ -21,6 +21,12 @@ public static class Util
     public static float ProjLength(this Vector2 vec1, Vector2 vec2)
         => Vector2.Dot(vec1, vec2) / vec2.LengthSquared * vec2.Length;
 
+    public static Vector2 Select(this Vector2 vector, Func<float, float> selector) =>
+        new(selector.Invoke(vector.X), selector.Invoke(vector.Y));
+
+    public static Vector3 Select(this Vector3 vector, Func<float, float> selector) =>
+        new(selector.Invoke(vector.X), selector.Invoke(vector.Y), selector.Invoke(vector.Z));
+
     public static AttributeType TypeToAttributeType(Type type) => type.Name switch
     {
         nameof(Int32) => AttributeType.Int,
