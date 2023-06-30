@@ -8,13 +8,14 @@ namespace OpenTKEngine.Rendering;
 //TODO: Consider making mesh into interface, and moving element buffer to mesh<T>.
 public abstract class Mesh: IDisposable
 {
+    //TODO: Add the information of how to draw the buffers into the mesh. (such as triangle or fan or such)
     public static readonly Mesh<Vector3> Box = new(
         new Vector3[]
         {
-            new( 1,  1, 0),
-            new( 1, -1, 0),
-            new(-1,  1, 0),
-            new(-1, -1, 0),
+            new(1, 1, 0),
+            new(1, 0, 0),
+            new(0, 1, 0),
+            new(0, 0, 0),
         },
         new uint[]
         {

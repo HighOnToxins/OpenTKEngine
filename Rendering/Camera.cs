@@ -76,8 +76,8 @@ public sealed class Camera: IReadOnlyCamera
     }
 
     public Camera() : this(
-        -Vector3.UnitZ,
         Vector3.UnitZ,
+        -Vector3.UnitZ,
         true
     )
     {

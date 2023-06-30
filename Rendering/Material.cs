@@ -9,8 +9,6 @@ public sealed class Material<T1, T2>: IMaterial
 {
     public ShaderProgram Shader { get; private init; }
 
-    //TODO: Consider adding properties to shader by default.
-
     public bool UsesCamera { get; private init; }
     public string ViewUniformName { get; private init; }
     public string ProjectionUniformName { get; private init; }
