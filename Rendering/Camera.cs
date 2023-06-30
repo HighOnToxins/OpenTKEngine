@@ -55,7 +55,7 @@ public sealed class Camera: IReadOnlyCamera
         Zoom = zoom;
         ScreenOffset = screenOffset;
         Rotation = rotation;
-        DepthRange = new(1, 100);
+        DepthRange = new(0, 100);
         WorldUp = up;
 
         Ratio = ratio;
@@ -92,9 +92,9 @@ public sealed class Camera: IReadOnlyCamera
     public Matrix4 Projection
     {
         get {
-            Vector2 bottomLeft = ScreenSize * ScreenOffset / 2 * Zoom;
-            Vector2 topRight = (ScreenSize * (ScreenOffset / 2 + Vector2.One)) * Zoom;
-            Vector2 depth = DepthRange * Zoom;
+            Vector2 bottomLeft = ScreenSize * Zoom * ScreenOffset / 2;
+            Vector2 topRight   = ScreenSize * Zoom * (ScreenOffset / 2 + Vector2.One);
+            Vector2 depth      = DepthRange * Zoom;
 
             if(IsOrthographic)
             {
@@ -108,6 +108,8 @@ public sealed class Camera: IReadOnlyCamera
     }
 
     public Matrix4 WorldToScreen { get => View * Projection; }
+
+    public Matrix4 ScreenToWorld { get => WorldToScreen.Inverted(); }
 
     public void CenterOn(Vector2 screenPosition)
     {
