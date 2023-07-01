@@ -40,7 +40,7 @@ public sealed class Material<T1, T2>: IMaterial
 
 public interface IMaterial
 {
-    public static readonly Material<Vector3, Shape> Shape = new(
+    public static readonly Material<Vector3, ShapeInstance> Shape = new(
         ShaderProgram.LoadFromMemory(Resources.shapeshaderv, Resources.shapeshaderf),
         "view", "proj", "pos", "model", "vColor"
     );
