@@ -8,13 +8,21 @@ namespace OpenTKEngine.Utility;
 public static class Util
 {
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static unsafe int ToInt(this bool b) => *(int*)&b;
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static float Lerp(bool inter, float start, float end) => (end - start) * inter.ToInt() + start;
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static float LerpEndZero(bool inter, float start) => start * inter.ToInt();
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float Rlerp(float inter, float inStart, float inEnd, float outStart, float outEnd)
         => (inter - inEnd) * (outEnd - outStart) / (inEnd - inStart) + outEnd;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Vector2 Proj(this Vector2 vec1, Vector2 vec2)
         => Vector2.Dot(vec1, vec2) / vec2.LengthSquared * vec2;
-    
 
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
